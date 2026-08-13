@@ -128,7 +128,9 @@ class RecommendationService:
             content=self.content,
             collaborative=self.collaborative,
             popularity=self.popularity,
-            weights=weights_from_config(self.config),
+            # Serving weights, not the validation-optimal ones -- see
+            # weights_from_config() and configs/config.yaml for the reasoning.
+            weights=weights_from_config(self.config, serving=True),
         ).fit(self.dataset, train)
         self.next_destination = NextDestinationRecommender(
             content=self.content, collaborative=self.collaborative, popularity=self.popularity

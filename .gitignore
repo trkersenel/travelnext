@@ -16,10 +16,14 @@ data/processed/
 # Trained artefacts
 models/*.joblib
 
-# Generated reports and figures
-reports/*.csv
-reports/*.json
-reports/figures/*.png
+# Generated reports and figures ARE committed: they are the project's
+# evidence, they are small, and a reviewer should see them on GitHub without
+# having to run a two-hour ingestion first.
+!reports/
+!reports/*.md
+!reports/*.csv
+!reports/*.json
+!reports/figures/*.png
 
 # OS / editor
 .DS_Store

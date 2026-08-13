@@ -82,7 +82,23 @@ def build_map(
     else:
         centre = [48.0, 10.0]
 
-    fmap = folium.Map(location=centre, zoom_start=4, tiles="OpenStreetMap")
+    # Pick the zoom from the spread of the markers. `fit_bounds` alone is not
+    # reliable through st_folium -- the map renders at `zoom_start` and the
+    # result was a whole-world view for a set of European cities.
+    zoom = 4
+    if len(points) > 1:
+        span = max(
+            max(p[0] for p in points) - min(p[0] for p in points),
+            (max(p[1] for p in points) - min(p[1] for p in points)) / 2.0,
+        )
+        for threshold, level in ((1, 9), (3, 7), (8, 6), (20, 5), (45, 4), (90, 3)):
+            if span <= threshold:
+                zoom = level
+                break
+        else:
+            zoom = 2
+
+    fmap = folium.Map(location=centre, zoom_start=zoom, tiles="OpenStreetMap")
 
     for destination_id in visited_ids:
         if destination_id not in frame.index:
@@ -125,9 +141,9 @@ def build_map(
                 delay=1200,
             ).add_to(fmap)
 
-    if points:
-        fmap.fit_bounds([[min(p[0] for p in points), min(p[1] for p in points)],
-                         [max(p[0] for p in points), max(p[1] for p in points)]])
+    # No fit_bounds(): through st_folium the container is not sized when Leaflet
+    # runs it, so it silently falls back to a whole-world view. The computed
+    # zoom_start above is reliable.
     return fmap
 
 
@@ -140,7 +156,9 @@ def render_recommendation(item: Dict) -> None:
     with left:
         st.markdown(header)
         if item["reasons"]:
-            st.markdown("\n".join(f"✓ {reason}" for reason in item["reasons"]))
+            # Two trailing spaces force a hard line break in markdown;
+            # a plain "\n" collapses every reason onto one line.
+            st.markdown("  \n".join(f"✓ {reason}" for reason in item["reasons"]))
         else:
             st.caption("No strong signal available for this destination.")
     with right:
@@ -268,7 +286,7 @@ def main() -> None:
     with tab_map:
         st.subheader("Where you have been, and where to go next")
         st.caption("Blue = visited · Red = recommended · Tiles © OpenStreetMap contributors")
-        st_folium(build_map(service, visited_ids, recommendations), height=520, width=None)
+        st_folium(build_map(service, visited_ids, recommendations), height=520, use_container_width=True)
 
     with tab_compare:
         if recommendations:
@@ -301,7 +319,7 @@ def main() -> None:
                             x="score", y="attribute", orientation="h",
                             range_x=[0, 1], title="Attribute percentiles (from OpenStreetMap)",
                         ),
-                        use_container_width=True,
+                        width='stretch',
                     )
             with right:
                 climate = pd.DataFrame(detail["monthly_climate"])
@@ -313,12 +331,12 @@ def main() -> None:
                             title="Mean temperature by month (Open-Meteo)",
                             labels={"mean_temp_c": "°C", "month_name": ""},
                         ),
-                        use_container_width=True,
+                        width='stretch',
                     )
                 st.markdown("**Most similar destinations**")
                 st.dataframe(
                     pd.DataFrame(detail["similar_destinations"])[["city", "similarity"]],
-                    hide_index=True, use_container_width=True,
+                    hide_index=True, width='stretch',
                 )
 
     with tab_about:

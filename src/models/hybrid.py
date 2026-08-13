@@ -3,13 +3,18 @@
     hybrid = alpha * content + beta * collaborative + gamma * popularity
              + delta * context
 
-Each component is min-max normalised to [0, 1] before blending, because the
-raw scales are not comparable (cosine similarity, shrunk co-visitation counts
-and a probability all live on different ranges).
+Each component is converted to a **percentile rank** before blending. Min-max
+was tried first and is wrong here: the raw scales are not merely different
+(cosine similarity, shrunk co-visitation counts, a probability), they have
+different *shapes*. Content scores are dense and clustered; item-item CF is
+sparse with a single sharp peak. Under min-max a nominal 0.4/0.4 split let the
+CF peak win outright, which is how "Mobile, Alabama" came top for a traveller
+returning from Amsterdam, Berlin and Prague. Under rank normalisation a weight
+of 0.4 really is 40% of the decision.
 
 The weights are NOT assumed to be good. ``src/models/tune_hybrid.py`` searches
-them against the validation split and writes the winner back to the config; the
-defaults in ``configs/config.yaml`` are only a starting point.
+them against the validation split; the defaults in ``configs/config.yaml`` are
+only a starting point.
 
 When a user has no history the collaborative component contributes nothing (it
 returns zeros), so the blend degrades gracefully into content plus popularity
@@ -76,8 +81,10 @@ class HybridRecommender(BaseRecommender):
         collaborative: Optional[ItemItemCFRecommender] = None,
         popularity: Optional[PopularityRecommender] = None,
         weights: Optional[HybridWeights] = None,
+        normalisation: str = "rank",
     ) -> None:
         super().__init__()
+        self.normalisation = normalisation
         self.content = content or ContentBasedRecommender()
         self.collaborative = collaborative or ItemItemCFRecommender()
         self.popularity = popularity or PopularityRecommender()
@@ -99,14 +106,19 @@ class HybridRecommender(BaseRecommender):
         learning-to-rank feature builder need exactly these numbers.
         """
         dataset = self._require_fitted()
+        # Rank normalisation, not min-max: see normalise_scores() for why
+        # min-max lets a sparse, spiky component dominate a blend that is
+        # nominally even.
         scores = {
-            "content": normalise_scores(self.content.score(request)),
-            "collaborative": normalise_scores(self.collaborative.score(request)),
-            "popularity": normalise_scores(self.popularity.score(request)),
+            "content": normalise_scores(self.content.score(request), self.normalisation),
+            "collaborative": normalise_scores(
+                self.collaborative.score(request), self.normalisation
+            ),
+            "popularity": normalise_scores(self.popularity.score(request), self.normalisation),
         }
         if self.context_scorer is not None:
             context = self.context_scorer.score(request)
-            scores["context"] = normalise_scores(context.combined())
+            scores["context"] = normalise_scores(context.combined(), self.normalisation)
         else:
             scores["context"] = np.zeros(dataset.n_destinations)
         return scores
@@ -122,8 +134,24 @@ class HybridRecommender(BaseRecommender):
         )
 
 
-def weights_from_config(config) -> HybridWeights:
-    """Build :class:`HybridWeights` from a loaded configuration."""
+def weights_from_config(config, *, serving: bool = False) -> HybridWeights:
+    """Build :class:`HybridWeights` from a loaded configuration.
+
+    ``serving=True`` returns the weights used to answer real requests, which
+    intentionally differ from the experiment defaults. See the extended comment
+    on ``models.hybrid.serving`` in ``configs/config.yaml``: tuning against
+    synthetic labels selects a pure-collaborative blend that demonstrably
+    recommends the wrong cities, so the served blend keeps real, measured
+    content and context signal. Documented product judgement, not a metric
+    claim.
+    """
+    if serving:
+        return HybridWeights(
+            content=float(config.get("models.hybrid.serving.content", 0.35)),
+            collaborative=float(config.get("models.hybrid.serving.collaborative", 0.25)),
+            popularity=float(config.get("models.hybrid.serving.popularity", 0.10)),
+            context=float(config.get("models.hybrid.serving.context", 0.30)),
+        )
     return HybridWeights(
         content=float(config.get("models.hybrid.alpha_content", 0.4)),
         collaborative=float(config.get("models.hybrid.beta_collaborative", 0.4)),

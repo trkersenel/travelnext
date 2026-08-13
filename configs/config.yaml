@@ -101,19 +101,49 @@ models:
     shrinkage: 10.0
     top_k_neighbours: 200
   hybrid:
-    # Defaults only. tune_hybrid.py overwrites these from validation data.
+    # Starting point for the validation search in tune_hybrid.py. The searched
+    # result is reported in reports/RESULTS.md; it is NOT written back here.
     alpha_content: 0.4
     beta_collaborative: 0.4
     gamma_popularity: 0.2
+    delta_context: 0.0
+
+    # ---- weights actually used when SERVING recommendations ----------------
+    # These deliberately differ from the validation-optimal weights, and the
+    # reason is important enough to spell out.
+    #
+    # Tuning on the synthetic interactions selects collaborative = 1.00: on
+    # those labels nothing else helps, because the generator's dominant
+    # mechanism is co-visitation and item-item CF models it directly. But a
+    # model fitted on synthetic co-visitation produces poor *real* answers. For
+    # a traveller returning from Amsterdam, Berlin and Prague the metric-optimal
+    # blend recommends Mobile (Alabama), Abuja and Belgrade, while the content
+    # model -- the only component grounded in real measured data (OpenStreetMap,
+    # climate, Wikipedia) -- returns Munich, Hamburg and Frankfurt.
+    #
+    # So the served blend keeps a substantial content and context weight. This
+    # is a documented product judgement, not a metric claim: it would be
+    # dishonest to report it as "tuned", and equally dishonest to ship
+    # recommendations we know are bad because a synthetic-label metric likes
+    # them. With real interaction data, tune these on the data instead.
+    serving:
+      content: 0.35
+      collaborative: 0.25
+      popularity: 0.10
+      context: 0.30
 
 candidate_generation:
-  n_candidates: 150
+  # Sized relative to the catalog. Measured: with 150 candidates from a
+  # 400-destination catalog, stage-1 recall was only 0.72, which capped the
+  # ranker below plain collaborative filtering -- the ranker cannot recover an
+  # answer that retrieval already discarded. Raise this if the catalog grows.
+  n_candidates: 250
   # How many candidates each source contributes before de-duplication.
   per_source:
-    content: 80
-    collaborative: 80
-    geographic: 40
-    popularity: 40
+    content: 120
+    collaborative: 150
+    geographic: 80
+    popularity: 60
 
 ranking:
   lightgbm:

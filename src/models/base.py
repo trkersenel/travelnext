@@ -158,19 +158,45 @@ class BaseRecommender:
         return [item.destination_id for item in self.recommend(request, k)]
 
 
-def normalise_scores(scores: np.ndarray) -> np.ndarray:
-    """Rescale scores to [0, 1] for comparable blending across models.
+def normalise_scores(scores: np.ndarray, method: str = "minmax") -> np.ndarray:
+    """Rescale scores to [0, 1] so components can be blended.
 
-    Uses min-max over finite values. A constant vector maps to all zeros, which
-    correctly makes that component contribute nothing to a hybrid blend.
+    ``minmax``
+        Linear rescaling. Preserves the shape of the distribution, which is
+        what the learning-to-rank feature builder wants.
+
+    ``rank``
+        Percentile rank. Use this when *combining* models, because min-max does
+        not make differently-shaped score distributions comparable. Measured on
+        this dataset: content scores are dense (mean 0.37, 95th pct 0.52) while
+        item-item CF is sparse and spiky (mean 0.16 but a single destination at
+        exactly 1.0). Under min-max a nominal 0.4/0.4 blend is therefore not an
+        even split of evidence at all -- the CF spike wins outright, which is
+        how "Mobile, Alabama" came top for a traveller returning from
+        Amsterdam, Berlin and Prague. Rank normalisation makes a weight of 0.4
+        actually mean 40% of the decision.
+
+    A constant vector maps to all zeros under either method, which correctly
+    makes that component contribute nothing.
     """
     values = np.asarray(scores, dtype="float64")
     finite = np.isfinite(values)
     if not finite.any():
         return np.zeros_like(values)
+
     lowest = values[finite].min()
     highest = values[finite].max()
     if highest <= lowest:
         return np.zeros_like(values)
+
+    if method == "rank":
+        ranked = np.zeros_like(values)
+        order = pd.Series(values[finite]).rank(pct=True, method="average").to_numpy()
+        ranked[finite] = order
+        return np.clip(ranked, 0.0, 1.0)
+
+    if method != "minmax":
+        raise ValueError(f"Unknown normalisation method: {method!r}")
+
     scaled = (values - lowest) / (highest - lowest)
     return np.clip(np.where(finite, scaled, 0.0), 0.0, 1.0)

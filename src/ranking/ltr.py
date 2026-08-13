@@ -205,13 +205,23 @@ def requests_from_interactions(
     interactions: pd.DataFrame,
     *,
     min_history: int = 1,
+    all_prefixes: bool = True,
 ) -> List[Tuple[RecommendationRequest, str]]:
     """Turn interaction histories into ``(request, next destination)`` pairs.
 
-    For each user the last trip in ``interactions`` becomes the target and the
-    preceding trips become the visible history, mirroring the leave-last-out
-    evaluation protocol. Because only one partition is ever passed in, no
-    request can contain a trip from a later partition.
+    With ``all_prefixes`` (the default) every position in a user's history
+    becomes a training example: predict trip *i* from trips ``0..i-1``. A user
+    with 8 training trips yields 7 examples instead of 1, which multiplies the
+    training set several-fold. This matters -- one example per user gave the
+    27-feature ranker only ~4k groups, far too few to beat the collaborative
+    score it consumes as a feature.
+
+    This introduces no leakage: every request is built from trips that strictly
+    precede its target, and only one partition is ever passed in, so no request
+    can see a trip from a later partition.
+
+    Set ``all_prefixes=False`` to keep the older behaviour of using only each
+    user's final trip, which mirrors the evaluation protocol exactly.
     """
     ordered = interactions.sort_values(["user_id", "trip_index"])
     pairs: List[Tuple[RecommendationRequest, str]] = []
@@ -220,19 +230,23 @@ def requests_from_interactions(
         destinations = group["destination_id"].tolist()
         if len(destinations) < min_history + 1:
             continue
-        target_row = group.iloc[-1]
-        history = destinations[:-1]
-        pairs.append(
-            (
-                RecommendationRequest(
-                    history=history[:-1],
-                    current_destination=history[-1],
-                    month=int(target_row["month"]),
-                    trip_duration_days=int(target_row["trip_duration_days"]),
-                    budget=str(target_row["budget"]),
-                    user_id=str(user_id),
-                ),
-                str(target_row["destination_id"]),
+
+        # Target positions, counted from the end of the visible history.
+        positions = range(min_history, len(destinations)) if all_prefixes else [len(destinations) - 1]
+        for position in positions:
+            target_row = group.iloc[position]
+            history = destinations[:position]
+            pairs.append(
+                (
+                    RecommendationRequest(
+                        history=history[:-1],
+                        current_destination=history[-1],
+                        month=int(target_row["month"]),
+                        trip_duration_days=int(target_row["trip_duration_days"]),
+                        budget=str(target_row["budget"]),
+                        user_id=str(user_id),
+                    ),
+                    str(target_row["destination_id"]),
+                )
             )
-        )
     return pairs

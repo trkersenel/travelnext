@@ -48,10 +48,15 @@ LOGGER = get_logger(__name__)
 class NextDestinationWeights:
     """Blend weights for the next-destination score."""
 
-    transition: float = 0.30
+    # Weighted towards the signals grounded in real data. The transition and
+    # collaborative rows come from synthetic interactions in this project,
+    # whereas geography and the OSM/text content profile are measured, so the
+    # served answer to "where after X?" leans on those. With real trip
+    # sequences, raise `transition` -- it is the sharpest signal for this task.
+    transition: float = 0.20
     content: float = 0.25
-    collaborative: float = 0.20
-    geographic: float = 0.15
+    collaborative: float = 0.15
+    geographic: float = 0.30
     popularity: float = 0.10
 
     def normalised(self) -> "NextDestinationWeights":
@@ -150,12 +155,16 @@ class NextDestinationRecommender(BaseRecommender):
             else np.zeros(dataset.n_destinations)
         )
 
+        # Rank normalisation throughout: the transition row and the CF row are
+        # both sparse and spiky, and under min-max a single synthetic
+        # co-visitation spike outranked every genuine neighbour (Kabul and
+        # Bloemfontein came top for "after Amsterdam"). See normalise_scores().
         return (
-            weights.transition * normalise_scores(self.transition_scores(origin_index))
-            + weights.content * normalise_scores(self.content.score(anchored))
-            + weights.collaborative * normalise_scores(self.collaborative.score(anchored))
-            + weights.geographic * normalise_scores(geographic)
-            + weights.popularity * normalise_scores(self.popularity.score(anchored))
+            weights.transition * normalise_scores(self.transition_scores(origin_index), "rank")
+            + weights.content * normalise_scores(self.content.score(anchored), "rank")
+            + weights.collaborative * normalise_scores(self.collaborative.score(anchored), "rank")
+            + weights.geographic * normalise_scores(geographic, "rank")
+            + weights.popularity * normalise_scores(self.popularity.score(anchored), "rank")
         )
 
     def component_scores(self, origin: str) -> Dict[str, np.ndarray]:
@@ -166,15 +175,16 @@ class NextDestinationRecommender(BaseRecommender):
             return {}
         anchored = RecommendationRequest(current_destination=origin)
         return {
-            "transition": normalise_scores(self.transition_scores(origin_index)),
-            "content": normalise_scores(self.content.score(anchored)),
-            "collaborative": normalise_scores(self.collaborative.score(anchored)),
+            "transition": normalise_scores(self.transition_scores(origin_index), "rank"),
+            "content": normalise_scores(self.content.score(anchored), "rank"),
+            "collaborative": normalise_scores(self.collaborative.score(anchored), "rank"),
             "geographic": normalise_scores(
                 distance_decay(self._distances[origin_index], self.geo_scale_km)
                 if self._distances is not None
-                else np.zeros(dataset.n_destinations)
+                else np.zeros(dataset.n_destinations),
+                "rank",
             ),
-            "popularity": normalise_scores(self.popularity.score(anchored)),
+            "popularity": normalise_scores(self.popularity.score(anchored), "rank"),
         }
 
     def recommend_next(self, origin: str, k: int = 10, **context) -> List[Tuple[str, float]]:

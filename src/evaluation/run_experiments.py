@@ -135,9 +135,17 @@ def run(config: Config, *, max_users: Optional[int] = None, tune: bool = True) -
         seed=config.seed,
     )
     training_pairs = requests_from_interactions(dataset, split.train)
-    validation_pairs = requests_from_interactions(
-        dataset, pd.concat([split.train, split.validation], ignore_index=True)
-    )
+    # Early-stopping pairs must target *validation* trips only. Building from
+    # train+validation and then filtering keeps each request's history intact
+    # while ensuring no training target is scored twice.
+    validation_targets = set(zip(split.validation["user_id"], split.validation["destination_id"]))
+    validation_pairs = [
+        (request, target)
+        for request, target in requests_from_interactions(
+            dataset, pd.concat([split.train, split.validation], ignore_index=True)
+        )
+        if (request.user_id, target) in validation_targets
+    ]
     LOGGER.info(
         "Training ranker on %d training pairs (%d validation pairs)",
         len(training_pairs),
