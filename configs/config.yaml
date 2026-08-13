@@ -35,9 +35,15 @@ ingest:
     max_workers: 8
     retries: 2
   overpass:
+    # One worker thread is pinned to each mirror, so this list also sets the
+    # concurrency. All three were verified to serve global data; regional
+    # extracts (e.g. overpass.osm.ch) must NOT be added here -- they answer
+    # with 200 and a count of zero outside their own country, which would look
+    # like "this city has no museums" rather than an error.
     endpoints:
       - "https://overpass-api.de/api/interpreter"
       - "https://overpass.kumi.systems/api/interpreter"
+      - "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
     # 4km around the city centre. Larger radii make Overpass queries
     # markedly more expensive for little extra signal.
     radius_m: 4000
