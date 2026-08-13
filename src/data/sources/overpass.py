@@ -23,6 +23,7 @@ bias rather than papering over it.
 from __future__ import annotations
 
 import queue
+import re
 import threading
 import time
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -97,6 +98,11 @@ POI_CATEGORIES: Dict[str, Tuple[str, ...]] = {
 
 CATEGORY_NAMES: Tuple[str, ...] = tuple(POI_CATEGORIES)
 
+# How long to back off when the mirror gives us no explicit slot time, and the
+# ceiling on any single wait so one unhealthy mirror cannot stall a whole run.
+_DEFAULT_COOLDOWN_S = 30.0
+_MAX_COOLDOWN_S = 120.0
+
 
 def build_query(lat: float, lon: float, radius_m: int, timeout_s: int) -> str:
     """Build one Overpass QL query returning a count per POI category.
@@ -109,6 +115,33 @@ def build_query(lat: float, lon: float, radius_m: int, timeout_s: int) -> str:
         union = "".join(f"nwr(around:{radius_m},{lat:.5f},{lon:.5f}){sel};" for sel in selectors)
         lines.append(f"({union});out count;")
     return "\n".join(lines)
+
+
+def seconds_until_slot(endpoint: str, *, user_agent: str, session=None) -> float:
+    """Ask an Overpass mirror when our next query slot frees up.
+
+    Overpass rejects over-quota queries with HTTP 429 or 504 within a few
+    seconds. Without this the client cannot tell a rejection from a genuine
+    timeout, and retrying immediately (or with a longer server-side timeout)
+    just burns the next slot too. ``/api/status`` reports the wait explicitly,
+    so we sleep exactly as long as the server asks and no longer.
+    """
+    status_url = endpoint.replace("/api/interpreter", "/api/status")
+    http = session or requests
+    try:
+        response = http.get(status_url, headers={"User-Agent": user_agent}, timeout=30)
+        response.raise_for_status()
+        text = response.text
+    except requests.RequestException:
+        return _DEFAULT_COOLDOWN_S
+
+    if "slots available" in text.lower():
+        return 0.0
+    waits = [int(match) for match in re.findall(r"in (\d+) seconds", text)]
+    if not waits:
+        return 0.0 if "Slot available after" not in text else _DEFAULT_COOLDOWN_S
+    # Wait for the soonest slot, plus a small margin.
+    return float(min(waits)) + 2.0
 
 
 def _parse_counts(payload: dict) -> Optional[List[int]]:
@@ -147,33 +180,39 @@ def fetch_city_pois(
         return {name: int(cached.get(name, 0)) for name in CATEGORY_NAMES}
 
     http = session or requests
+    query = build_query(lat, lon, radius_m, timeout_s)
     for attempt in range(retries):
         endpoint = endpoints[attempt % len(endpoints)]
-        # Dense megacities (Tokyo, Seoul, Jakarta) exceed the default budget.
-        # Escalate the server-side timeout rather than dropping the city.
-        attempt_timeout = timeout_s * (attempt + 1)
-        query = build_query(lat, lon, radius_m, attempt_timeout)
         try:
             response = http.post(
                 endpoint,
                 data={"data": query},
                 headers={"User-Agent": user_agent},
-                timeout=attempt_timeout + 30,
+                timeout=timeout_s + 30,
             )
             if response.status_code in (429, 504) or response.status_code >= 500:
-                # Overpass signals overload this way; wait before switching host.
-                time.sleep(5.0 * (attempt + 1))
+                # Almost always "you are over quota", not a slow query: these
+                # come back in seconds. Ask the server when we may return and
+                # wait exactly that long.
+                wait = seconds_until_slot(endpoint, user_agent=user_agent, session=http)
+                LOGGER.debug(
+                    "Overpass %s on %s; waiting %.0fs for a slot",
+                    response.status_code,
+                    cache_key,
+                    wait,
+                )
+                time.sleep(min(wait, _MAX_COOLDOWN_S))
                 continue
             response.raise_for_status()
             counts = _parse_counts(response.json())
             if counts is None:
-                time.sleep(3.0)
+                time.sleep(_DEFAULT_COOLDOWN_S)
                 continue
             result = dict(zip(CATEGORY_NAMES, counts))
             cache.set(cache_key, result)
             return result
         except (requests.RequestException, ValueError):
-            time.sleep(3.0 * (attempt + 1))
+            time.sleep(_DEFAULT_COOLDOWN_S)
 
     LOGGER.warning("Overpass failed for %s (%.4f, %.4f)", cache_key, lat, lon)
     return None

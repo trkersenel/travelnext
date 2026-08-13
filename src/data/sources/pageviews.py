@@ -16,6 +16,7 @@ documented in the README rather than hidden.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+import statistics
 from datetime import date, timedelta
 from typing import Dict, Iterable, List, Optional
 from urllib.parse import quote
@@ -42,13 +43,16 @@ _BASE = (
 def _window(months: int) -> tuple[str, str]:
     """Return the (start, end) API timestamps for a trailing month window.
 
-    The window ends at the start of the previous month, because the current
-    month is always partial and would understate recent data.
+    The window covers exactly ``months`` **complete** calendar months, ending
+    with the last day of the previous month. Both boundaries matter: ending on
+    the *first* of a month would append a one-day bucket that looks like a
+    catastrophic traffic collapse and drags every average down.
     """
     today = date.today()
+    # Last day of the previous month.
     end = date(today.year, today.month, 1) - timedelta(days=1)
-    end = date(end.year, end.month, 1)
-    year, month = end.year, end.month - months
+
+    year, month = end.year, end.month - (months - 1)
     while month <= 0:
         month += 12
         year -= 1
@@ -87,6 +91,8 @@ def _fetch_one(
         return {
             "wiki_title": title,
             "pageviews_total": 0.0,
+            "pageviews_median": 0.0,
+            "pageviews_max": 0.0,
             "pageviews_months": 0,
             "pageviews_available": False,
         }
@@ -94,16 +100,31 @@ def _fetch_one(
         return {
             "wiki_title": title,
             "pageviews_total": 0.0,
+            "pageviews_median": 0.0,
+            "pageviews_max": 0.0,
             "pageviews_months": 0,
             "pageviews_available": True,
         }
 
-    items = payload.get("items", [])
-    total = float(sum(int(item.get("views", 0)) for item in items))
+    views = [float(item.get("views", 0)) for item in payload.get("items", [])]
+    if not views:
+        return {
+            "wiki_title": title,
+            "pageviews_total": 0.0,
+            "pageviews_median": 0.0,
+            "pageviews_max": 0.0,
+            "pageviews_months": 0,
+            "pageviews_available": True,
+        }
     return {
         "wiki_title": title,
-        "pageviews_total": total,
-        "pageviews_months": len(items),
+        "pageviews_total": float(sum(views)),
+        # The median is the headline statistic: automated traffic arrives as
+        # short, enormous bursts, and a mean lets one bot month dominate two
+        # years of real interest. See ``fetch_pageviews`` for the diagnostic.
+        "pageviews_median": float(statistics.median(views)),
+        "pageviews_max": float(max(views)),
+        "pageviews_months": len(views),
         "pageviews_available": True,
     }
 
@@ -181,6 +202,22 @@ def fetch_pageviews(
         else 0.0,
         axis=1,
     )
+    # Data-quality diagnostic. Organic traffic is fairly stable month to month,
+    # so mean ~= median. A large ratio means short bursts of automated traffic
+    # that the API's `agent=user` filter did not catch -- observed for real:
+    # two unrelated cities showed near-identical million-view spikes.
+    frame["pageviews_anomaly_ratio"] = frame.apply(
+        lambda row: row["pageviews_monthly_mean"] / row["pageviews_median"]
+        if row["pageviews_median"] > 0
+        else 1.0,
+        axis=1,
+    )
     resolved = int((frame["pageviews_total"] > 0).sum())
+    suspicious = int((frame["pageviews_anomaly_ratio"] > 1.5).sum())
     LOGGER.info("Pageviews resolved for %d/%d articles", resolved, len(frame))
+    LOGGER.info(
+        "%d articles show burst-like traffic (mean/median > 1.5); the median is "
+        "used as the popularity statistic to limit their influence",
+        suspicious,
+    )
     return frame

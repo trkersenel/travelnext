@@ -18,12 +18,16 @@ from typing import Dict, List, Optional
 import pandas as pd
 import requests
 
-from src.utils.http import HttpCache, request_json
+from src.utils.http import HttpCache, RateLimiter, is_failed, request_json
 from src.utils.logging_utils import get_logger
 
 LOGGER = get_logger(__name__)
 
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
+# Open-Meteo's free tier throttles bursts (measured: 4 concurrent workers draw
+# HTTP 429). Five years of daily data per city is a heavy query, so we keep the
+# aggregate rate low and let the disk cache make re-runs free.
+_RATE_LIMITER = RateLimiter(requests_per_second=2.0)
 MONTH_COLUMNS = [f"{stat}_m{month:02d}" for stat in ("temp", "precip") for month in range(1, 13)]
 
 
@@ -54,10 +58,15 @@ def _fetch_one(
         cache_key=f"climate:{destination_id}:{start_date}:{end_date}",
         user_agent=user_agent,
         timeout=timeout,
-        retries=2,
-        backoff_s=3.0,
+        retries=4,
+        backoff_s=4.0,
         session=session,
+        rate_limiter=_RATE_LIMITER,
     )
+    if is_failed(payload):
+        # Distinguish "could not ask" from "no data": the caller retries the
+        # former rather than baking a throttled request in as missing climate.
+        return None
     daily = (payload or {}).get("daily") or {}
     times = daily.get("time") or []
     temps = daily.get("temperature_2m_mean") or []
@@ -109,31 +118,44 @@ def fetch_climate_table(
     of failing.
     """
     cache = HttpCache(cache_dir, "climate")
-    records: List[Optional[Dict[str, float]]] = []
+    rows = list(cities.itertuples(index=False))
 
-    with requests.Session() as session:
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            futures = [
-                pool.submit(
-                    _fetch_one,
-                    str(getattr(city, id_column)),
-                    float(city.latitude),
-                    float(city.longitude),
-                    start_date=start_date,
-                    end_date=end_date,
-                    cache=cache,
-                    user_agent=user_agent,
-                    timeout=timeout,
-                    session=session,
-                )
-                for city in cities.itertuples(index=False)
-            ]
-            for index, future in enumerate(futures, start=1):
-                records.append(future.result())
-                if index % 100 == 0:
-                    LOGGER.info("Climate progress: %d/%d", index, len(futures))
+    def run_pass(subset, workers: int) -> List[Optional[Dict[str, float]]]:
+        collected: List[Optional[Dict[str, float]]] = []
+        with requests.Session() as session:
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                futures = [
+                    pool.submit(
+                        _fetch_one,
+                        str(getattr(city, id_column)),
+                        float(city.latitude),
+                        float(city.longitude),
+                        start_date=start_date,
+                        end_date=end_date,
+                        cache=cache,
+                        user_agent=user_agent,
+                        timeout=timeout,
+                        session=session,
+                    )
+                    for city in subset
+                ]
+                for index, future in enumerate(futures, start=1):
+                    collected.append(future.result())
+                    if index % 100 == 0:
+                        LOGGER.info("Climate progress: %d/%d", index, len(futures))
+        return collected
 
-    ids = [str(getattr(city, id_column)) for city in cities.itertuples(index=False)]
+    records = run_pass(rows, max_workers)
+
+    # Retry the throttled cities serially so a burst of 429s does not turn into
+    # permanently missing climate data.
+    failed = [city for city, record in zip(rows, records) if record is None]
+    if failed:
+        LOGGER.warning("Retrying %d failed climate requests serially", len(failed))
+        retried = run_pass(failed, 1)
+        records = [r for r in records if r is not None] + [r for r in retried if r is not None]
+
+    ids = [str(getattr(city, id_column)) for city in rows]
     resolved = [record for record in records if record is not None]
     frame = pd.DataFrame(resolved) if resolved else pd.DataFrame(columns=["destination_id"])
     frame = pd.DataFrame({id_column: ids}).merge(frame, on=id_column, how="left")

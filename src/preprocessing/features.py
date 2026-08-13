@@ -80,7 +80,13 @@ def add_popularity_features(frame: pd.DataFrame) -> pd.DataFrame:
     views than Ghent) so that popularity does not swamp every other signal.
     """
     frame = frame.copy()
-    monthly = _numeric_column(frame, "pageviews_monthly_mean").fillna(0.0)
+    # Prefer the median monthly views: it is robust to the automated-traffic
+    # bursts that inflate the mean for a minority of articles. Falls back to
+    # the mean for datasets built before the median was recorded.
+    monthly = _numeric_column(frame, "pageviews_median")
+    if monthly.isna().all():
+        monthly = _numeric_column(frame, "pageviews_monthly_mean")
+    monthly = monthly.fillna(0.0)
     frame["pageviews_log"] = np.log1p(monthly)
     frame["popularity_score"] = percentile_rank(frame["pageviews_log"])
     frame["population_log"] = np.log1p(_numeric_column(frame, "population").fillna(0.0))

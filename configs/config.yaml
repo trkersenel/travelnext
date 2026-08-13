@@ -19,14 +19,16 @@ ingest:
   # The Wikimedia User-Agent policy asks for a contact URL and throttles
   # generic agents with HTTP 429. Point this at your own fork before running a
   # full ingestion.
-  user_agent: "TravelNext/0.1 (https://github.com/travelnext/travelnext; open-source travel recommender; educational use)"
+  user_agent: "TravelNext/0.1 (https://github.com/trkersenel/travelnext; open-source travel recommender; educational use)"
   request_timeout_s: 60
-  # Minimum population for a settlement to enter the candidate pool (Wikidata).
+  # Minimum population for a settlement to enter the candidate pool (GeoNames).
   min_population: 100000
   # After ranking candidates by Wikipedia pageviews we keep this many cities.
-  # This keeps the Overpass (OpenStreetMap) load respectful and the dataset
-  # small enough for an 8GB laptop.
-  catalog_size: 800
+  # Sized by what the free Overpass API can serve responsibly: it grants ~2
+  # query slots per client, so each destination costs real time on a donated
+  # service. 400 destinations across ~100 countries is enough for meaningful
+  # recommendations while keeping a full ingest under an hour.
+  catalog_size: 400
   pageviews:
     # Trailing window used as the popularity proxy.
     months: 24
@@ -36,12 +38,14 @@ ingest:
     endpoints:
       - "https://overpass-api.de/api/interpreter"
       - "https://overpass.kumi.systems/api/interpreter"
-    radius_m: 5000
+    # 4km around the city centre. Larger radii make Overpass queries
+    # markedly more expensive for little extra signal.
+    radius_m: 4000
     timeout_s: 90
     # Seconds to sleep between city queries. Do not lower this: the endpoint
-    # is a free community service.
-    sleep_between_s: 1.5
-    retries: 3
+    # is a free community service that grants only a couple of slots per client.
+    sleep_between_s: 3.0
+    retries: 5
   climate:
     # Daily data aggregated into monthly normals.
     start_date: "2020-01-01"

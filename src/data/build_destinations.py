@@ -114,9 +114,14 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
         max_workers=int(config.get("ingest.pageviews.max_workers", 8)),
     )
     catalog = catalog.merge(views, on="wiki_title", how="left")
-    catalog[["pageviews_total", "pageviews_monthly_mean"]] = catalog[
-        ["pageviews_total", "pageviews_monthly_mean"]
-    ].fillna(0.0)
+    view_columns = [
+        "pageviews_total",
+        "pageviews_monthly_mean",
+        "pageviews_median",
+        "pageviews_max",
+    ]
+    catalog[view_columns] = catalog[view_columns].fillna(0.0)
+    catalog["pageviews_anomaly_ratio"] = catalog["pageviews_anomaly_ratio"].fillna(1.0)
     catalog["pageviews_available"] = catalog["pageviews_available"].fillna(False).astype(bool)
     unavailable = int((~catalog["pageviews_available"]).sum())
     if unavailable:
@@ -133,8 +138,11 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
     catalog_size = int(config.get("ingest.catalog_size", 800))
     if limit is not None:
         catalog_size = min(catalog_size, limit)
+    # Ranked by the MEDIAN monthly views, not the total. Bot traffic arrives in
+    # short bursts, and ranking by total let two cities with near-identical
+    # million-view spikes (Utrecht, Durres) outrank London.
     catalog = (
-        catalog.sort_values("pageviews_total", ascending=False)
+        catalog.sort_values("pageviews_median", ascending=False)
         .head(catalog_size)
         .reset_index(drop=True)
     )
