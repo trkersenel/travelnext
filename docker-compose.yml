@@ -1,0 +1,103 @@
+# TravelNext local stack.
+#
+#   docker compose up api ui          # serve the API and the UI
+#   docker compose run --rm ingest    # build the dataset (needs internet, once)
+#   docker compose run --rm experiments
+#   docker compose run --rm tests
+#
+# Everything runs on your machine. No cloud account, no API key, no billing.
+
+services:
+  api:
+    build: .
+    image: travelnext:latest
+    container_name: travelnext-api
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      # Shared so the UI and the experiments see the same ingested dataset.
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+    environment:
+      TRAVELNEXT_LOG_LEVEL: INFO
+    restart: unless-stopped
+
+  ui:
+    build: .
+    image: travelnext:latest
+    container_name: travelnext-ui
+    command: >
+      streamlit run app/streamlit_app.py
+      --server.port=8501
+      --server.address=0.0.0.0
+      --server.headless=true
+      --browser.gatherUsageStats=false
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+    environment:
+      TRAVELNEXT_LOG_LEVEL: INFO
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # One-shot jobs. `docker compose run --rm <name>`.
+  ingest:
+    build: .
+    image: travelnext:latest
+    profiles: ["jobs"]
+    command: >
+      sh -c "python -m src.data.build_destinations && python -m src.data.build_dataset"
+    volumes:
+      - ./data:/app/data
+
+  experiments:
+    build: .
+    image: travelnext:latest
+    profiles: ["jobs"]
+    command: python -m src.evaluation.run_experiments
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+
+  tests:
+    build: .
+    image: travelnext:latest
+    profiles: ["jobs"]
+    command: python -m pytest tests/ -q
+    volumes:
+      - ./data:/app/data
+
+# PostgreSQL is intentionally not part of the default stack. The dataset is a
+# few megabytes of parquet read once at startup, so a database would add an
+# operational dependency without buying anything. Enable this profile only if
+# you want to persist users and recommendation logs:
+#
+#   docker compose --profile database up db
+#
+  db:
+    image: postgres:16-alpine
+    profiles: ["database"]
+    container_name: travelnext-db
+    environment:
+      POSTGRES_USER: travelnext
+      POSTGRES_PASSWORD: travelnext
+      POSTGRES_DB: travelnext
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U travelnext"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Data: raw downloads and the HTTP cache are reproducible from the pipeline
+# and are far too large for git. The processed dataset is also regenerable.
+data/raw/
+data/interim/
+data/processed/
+
+# Trained artefacts
+models/*.joblib
+
+# Generated reports and figures
+reports/*.csv
+reports/*.json
+reports/figures/*.png
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

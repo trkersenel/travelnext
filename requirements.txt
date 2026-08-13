@@ -1,0 +1,36 @@
+# TravelNext dependencies.
+# Every package here is free and open source. Nothing requires an account,
+# an API key or a paid service.
+#
+# Version floors are the versions the project was developed and tested against
+# (Python 3.14). Upper bounds are deliberately omitted so security updates flow
+# through; pin exactly with `pip freeze` if you need byte-identical rebuilds.
+
+# --- core data and modelling ---
+numpy>=2.5.2
+pandas>=3.0.5
+scipy>=1.18.0
+scikit-learn>=1.9.0
+lightgbm>=4.7.0
+joblib>=1.5.3
+pyarrow>=24.0.0          # parquet I/O
+
+# --- ingestion ---
+requests>=2.34.2
+PyYAML>=6.0.3
+
+# --- API ---
+fastapi>=0.141.1
+uvicorn[standard]>=0.52.3
+pydantic>=2.13.4
+
+# --- UI and visualisation ---
+streamlit>=1.61.1
+streamlit-folium>=0.27.4
+folium>=0.20.0           # OpenStreetMap tiles, no Google Maps key needed
+plotly>=6.9.0
+matplotlib>=3.11.1
+
+# --- tests ---
+pytest>=9.1.1
+httpx>=0.28.1            # FastAPI TestClient transport
