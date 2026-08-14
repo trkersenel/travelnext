@@ -70,6 +70,8 @@ class RecommendationItem(BaseModel):
     rank: int
     cost_category: str
     popularity_percentile: float
+    image_url: str = Field(default="", description="Wikimedia Commons thumbnail (CC/PD licensed).")
+    image_page: str = Field(default="", description="Wikipedia article the image came from.")
     reasons: List[str] = Field(default_factory=list)
     reason_details: List[ReasonDetail] = Field(default_factory=list)
     attributes: Dict[str, float] = Field(default_factory=dict)
@@ -104,6 +106,7 @@ class DestinationSummary(BaseModel):
     population: int
     cost_category: str
     popularity_percentile: float
+    image_url: str = Field(default="", description="Wikimedia Commons thumbnail (CC/PD licensed).")
 
 
 class DestinationListResponse(BaseModel):

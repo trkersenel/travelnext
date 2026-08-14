@@ -49,8 +49,24 @@ def _fetch_one(
         rate_limiter=_RATE_LIMITER,
     )
     if not payload or is_missing(payload):
-        return {"wiki_title": title, "summary": ""}
-    return {"wiki_title": title, "summary": str(payload.get("extract", "") or "")}
+        return {"wiki_title": title, "summary": "", "image_url": "", "image_page": ""}
+
+    # The same response carries a Commons image. Using it keeps destination
+    # photography free, key-less and correctly licensed -- a stock-photo API
+    # would need an account and would break the project's zero-cost guarantee,
+    # and these pictures are of the actual destination rather than a generic
+    # "travel" image.
+    thumbnail = payload.get("thumbnail") or {}
+    original = payload.get("originalimage") or {}
+    return {
+        "wiki_title": title,
+        "summary": str(payload.get("extract", "") or ""),
+        "image_url": str(thumbnail.get("source", "") or ""),
+        "image_page": str(
+            (payload.get("content_urls", {}).get("desktop", {}) or {}).get("page", "") or ""
+        ),
+        "image_width": int(original.get("width", 0) or 0),
+    }
 
 
 def fetch_summaries(
@@ -87,5 +103,7 @@ def fetch_summaries(
 
     frame = pd.DataFrame(rows)
     non_empty = int((frame["summary"].str.len() > 0).sum())
+    with_image = int((frame["image_url"].str.len() > 0).sum())
     LOGGER.info("Summaries resolved for %d/%d articles", non_empty, len(frame))
+    LOGGER.info("Commons images found for %d/%d articles", with_image, len(frame))
     return frame

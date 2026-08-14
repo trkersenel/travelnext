@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TravelNext — where should I travel next?</title>
+<meta name="description" content="An explainable travel recommendation engine built entirely on free, openly licensed data." />
+
+<!-- Google Fonts: free and key-less. Every stack has a system fallback in
+     styles.css, so the page still renders correctly with no network. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="shell">
+    <div class="logo"><span class="mark">◈</span> TravelNext</div>
+    <nav class="site-nav" id="nav">
+      <button data-view="recommend" class="is-active">Recommendations</button>
+      <button data-view="how">How it works</button>
+      <button data-view="trips">Your trips</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ------------------------------------------------ hero -->
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div>
+        <div class="ribbon">
+          <span class="dot"></span>
+          <span class="place">Currently exploring · <span id="current-place">—</span></span>
+        </div>
+        <h1>Your next trip could be <em id="hero-lead">somewhere new</em></h1>
+        <p class="hero-sub">
+          Recommendations learned from where you have already been and from
+          measured destination characteristics — not from a list of the world's
+          most famous cities.
+        </p>
+      </div>
+
+      <aside class="signals">
+        <h2>Based on</h2>
+        <dl>
+          <div class="row"><dt>Trips in history</dt><dd id="sig-trips">0</dd></div>
+          <div class="row"><dt>Departing from</dt><dd id="sig-origin">—</dd></div>
+          <div class="row"><dt>Travelling</dt><dd id="sig-month">—</dd></div>
+          <div class="row"><dt>Budget</dt><dd id="sig-budget">—</dd></div>
+          <div class="row"><dt>Model</dt><dd id="sig-model">—</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------ controls -->
+  <section class="controls">
+    <div class="shell">
+      <div class="control">
+        <span class="label">Month</span>
+        <select id="month"></select>
+      </div>
+      <div class="control">
+        <span class="label">Days</span>
+        <input type="number" id="duration" min="2" max="21" value="5" style="width:70px" />
+      </div>
+      <div class="control">
+        <span class="label">Budget</span>
+        <select id="budget">
+          <option value="budget">Budget</option>
+          <option value="mid-range" selected>Mid-range</option>
+          <option value="expensive">Expensive</option>
+        </select>
+      </div>
+      <div class="control">
+        <span class="label">Model</span>
+        <select id="model"></select>
+      </div>
+      <div class="control">
+        <span class="label">Sort by</span>
+        <div class="segmented" id="sort">
+          <button data-sort="match" class="is-active">Match</button>
+          <button data-sort="budget">Budget</button>
+          <button data-sort="nearest">Nearest</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="shell">
+    <div id="notice"></div>
+
+    <!-- ------------------------------------------------ recommendations -->
+    <section id="view-recommend">
+      <div class="section-head">
+        <h2>Your next destinations</h2>
+        <span class="label" id="result-count"></span>
+      </div>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <!-- ------------------------------------------------ how we chose -->
+    <section class="how" id="view-how">
+      <span class="label">How we chose these</span>
+      <div class="signposts">
+        <div class="signpost">
+          <h3>What you have liked</h3>
+          <p>
+            Every destination is described by what is actually mapped there in
+            OpenStreetMap — museums, bars, parks, monuments, beach area — and
+            compared against the character of the places you have already
+            visited.
+          </p>
+        </div>
+        <div class="signpost">
+          <h3>Travellers like you</h3>
+          <p>
+            Item-to-item collaborative filtering finds destinations that are
+            repeatedly visited by people whose histories resemble yours, which
+            surfaces pairings that attributes alone would miss.
+          </p>
+        </div>
+        <div class="signpost">
+          <h3>When and where you are going</h3>
+          <p>
+            Climate normals decide whether the month suits the place, country
+            price levels match your budget, and great-circle distance keeps a
+            short trip from sending you across the world.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------ past trips -->
+    <section class="trips" id="view-trips">
+      <div class="section-head">
+        <h2>Where you have been</h2>
+        <span class="label">Shapes every recommendation above</span>
+      </div>
+      <div class="trip-row" id="trip-row"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="shell">
+    <p>
+      Destination data: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0) ·
+      <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (ODbL) ·
+      <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ·
+      <a href="https://data.worldbank.org/">World Bank</a> (CC BY 4.0) ·
+      text and photography from <a href="https://en.wikipedia.org/">Wikipedia</a> and
+      Wikimedia Commons (CC BY-SA / public domain).
+    </p>
+    <p>
+      <strong>Traveller interaction data is synthetic.</strong> No real person's
+      travel history is used anywhere in this application; the collaborative
+      signals demonstrate the mechanism, not real travel behaviour.
+    </p>
+  </div>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

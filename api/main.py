@@ -14,8 +14,12 @@ from __future__ import annotations
 
 from typing import List, Optional
 
+from pathlib import Path
+
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from api.schemas import (
     DestinationListResponse,
@@ -58,6 +62,24 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+# ---------------------------------------------------------------- frontend
+# The web UI is plain HTML/CSS/JS served from the same origin, so it needs no
+# build step, no bundler and no second process. Mounted before the route
+# definitions so /static never collides with an API path.
+WEB_DIR = Path(__file__).resolve().parents[1] / "web"
+if WEB_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def index() -> FileResponse:
+    """Serve the TravelNext web app."""
+    page = WEB_DIR / "index.html"
+    if not page.exists():
+        raise HTTPException(status_code=404, detail="Web frontend not installed")
+    return FileResponse(page)
 
 
 def service_dependency() -> RecommendationService:
@@ -132,6 +154,7 @@ def list_destinations(
                 population=int(row.population),
                 cost_category=str(row.cost_category),
                 popularity_percentile=round(float(row.popularity_score), 4),
+                image_url=str(getattr(row, "image_url", "") or ""),
             )
             for row in page.itertuples(index=False)
         ],

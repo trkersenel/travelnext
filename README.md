@@ -293,7 +293,8 @@ travelnext/
 │   ├── analysis/             # EDA, bias/diversity, results rendering
 │   └── service.py            # shared by the API and the UI
 ├── api/                      # FastAPI
-├── app/                      # Streamlit
+├── app/                  # Streamlit UI
+├── web/                  # web front-end (HTML/CSS/JS, served by FastAPI)                      # Streamlit
 ├── tests/
 └── configs/config.yaml       # every knob lives here
 ```
@@ -357,6 +358,35 @@ uvicorn api.main:app --reload            # http://localhost:8000/docs
 streamlit run app/streamlit_app.py       # http://localhost:8501
 pytest tests/ -q
 ```
+
+### Web app
+
+A second front-end, built to a Figma design, is served by the API itself at
+`http://localhost:8000/` — plain HTML/CSS/JS, no build step, no bundler, no
+second process:
+
+```bash
+uvicorn api.main:app
+```
+
+Editorial layout: warm ivory canvas, Spectral for display type, DM Sans for UI,
+JetBrains Mono for labels, and terracotta used only for the match badge, the
+match bar, the nav underline and the signpost borders. Sorting by **Match**,
+**Budget** or **Nearest** re-orders the results client-side, and the lead card
+takes a taller photo only under Match — so the ordering visibly changes the
+layout rather than just the sequence. It collapses to two columns at tablet and
+one at mobile.
+
+**Photography comes from Wikimedia Commons, not a stock-photo API.** The
+design called for Unsplash, but that needs an account and an API key, which
+would break the project's central promise. The Wikipedia summary endpoint
+already returns a Commons image for each article, and the ingestion pipeline
+had those payloads cached — so every one of the 400 destinations has a real,
+correctly licensed photograph *of that destination*, obtained with zero
+additional network requests and no key.
+
+The Streamlit app remains for analysis work (attribute charts, climate curves,
+the Folium map); the web app is the product surface.
 
 ### Docker
 

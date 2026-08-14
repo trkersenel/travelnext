@@ -55,6 +55,8 @@ class Recommendation:
     rank: int
     cost_category: str
     popularity_percentile: float
+    image_url: str = ""
+    image_page: str = ""
     reasons: List[Reason] = field(default_factory=list)
     attributes: Dict[str, float] = field(default_factory=dict)
 
@@ -72,6 +74,8 @@ class Recommendation:
             "rank": self.rank,
             "cost_category": self.cost_category,
             "popularity_percentile": round(float(self.popularity_percentile), 4),
+            "image_url": self.image_url,
+            "image_page": self.image_page,
             "reasons": [reason.text for reason in self.reasons],
             "reason_details": [reason.as_dict() for reason in self.reasons],
             "attributes": {k: round(float(v), 3) for k, v in self.attributes.items()},
@@ -309,6 +313,8 @@ class RecommendationService:
             rank=rank,
             cost_category=str(row["cost_category"]),
             popularity_percentile=float(row["popularity_score"]),
+            image_url=str(row.get("image_url", "") or ""),
+            image_page=str(row.get("image_page", "") or ""),
             reasons=self.explainer.explain(request, destination_id) if explain else [],
             attributes=attributes,
         )
@@ -370,6 +376,8 @@ class RecommendationService:
                 for month in range(1, 13)
             ],
             "summary": str(row.get("summary", ""))[:600],
+            "image_url": str(row.get("image_url", "") or ""),
+            "image_page": str(row.get("image_page", "") or ""),
             "wiki_title": str(row.get("wiki_title", "")),
             "similar_destinations": similar,
         }

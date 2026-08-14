@@ -236,6 +236,8 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
     frame["continent"] = frame["country_code"].map(regions.continent_of)
     frame["region"] = frame["country_code"].map(regions.region_of)
     frame["summary"] = frame["summary"].fillna("")
+    for column in ("image_url", "image_page"):
+        frame[column] = frame[column].fillna("") if column in frame.columns else ""
     frame["poi_available"] = frame["poi_available"].fillna(False).astype(bool)
 
     poi_columns: List[str] = [f"poi_{name}" for name in overpass.CATEGORY_NAMES]
