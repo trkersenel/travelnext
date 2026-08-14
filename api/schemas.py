@@ -130,3 +130,45 @@ class HealthResponse(BaseModel):
     ranker_available: bool
     available_models: List[str]
     data_sources: Dict[str, str]
+
+
+class ProfileRequest(BaseModel):
+    """Body of ``POST /profile``."""
+
+    history: List[str] = Field(
+        default_factory=list, description="Destination ids the traveller has visited."
+    )
+
+
+class TraitItem(BaseModel):
+    """One inferred trait, with the deviation that justifies it."""
+
+    category: str
+    label: str
+    deviation: float = Field(
+        description="Standard deviations above the catalog norm across the visited set."
+    )
+
+
+class VisitedItem(BaseModel):
+    """A destination in the traveller's history."""
+
+    destination_id: str
+    city: str
+    country: str
+    country_code: str
+    image_url: str = ""
+    latitude: float
+    longitude: float
+
+
+class ProfileResponse(BaseModel):
+    """Inferred travel profile. Every field is derived from measured data."""
+
+    n_visited: int
+    traits: List[TraitItem] = Field(default_factory=list)
+    region: str = ""
+    continent: str = ""
+    cost_band: str = ""
+    walkable: bool = False
+    visited: List[VisitedItem] = Field(default_factory=list)

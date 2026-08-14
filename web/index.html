@@ -3,166 +3,360 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TravelNext — where should I travel next?</title>
-<meta name="description" content="An explainable travel recommendation engine built entirely on free, openly licensed data." />
+<title>TravelNext — discover where you should go next</title>
+<meta name="description" content="Tell us where you've been. TravelNext learns what kind of traveller you are and helps you discover your next destination." />
 
-<!-- Google Fonts: free and key-less. Every stack has a system fallback in
-     styles.css, so the page still renders correctly with no network. -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<!-- Leaflet for the travel-history map: free, open source, OpenStreetMap
+     tiles, no key. Desaturated in CSS to keep the neutral editorial tone. -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
 
-<header class="site-header">
-  <div class="shell">
-    <div class="logo"><span class="mark">◈</span> TravelNext</div>
-    <nav class="site-nav" id="nav">
-      <button data-view="recommend" class="is-active">Recommendations</button>
-      <button data-view="how">How it works</button>
-      <button data-view="trips">Your trips</button>
-    </nav>
-  </div>
-</header>
+<!-- =================================================================== -->
+<!-- 1. LOGIN                                                            -->
+<!-- =================================================================== -->
+<section class="screen is-active" id="screen-login">
+  <div class="split">
+    <div class="split-media">
+      <img id="login-photo" alt="" />
+      <figcaption class="photo-credit" id="login-credit"></figcaption>
+    </div>
 
-<main>
-  <!-- ------------------------------------------------ hero -->
-  <section class="hero">
-    <div class="shell hero-grid">
-      <div>
-        <div class="ribbon">
-          <span class="dot"></span>
-          <span class="place">Currently exploring · <span id="current-place">—</span></span>
+    <div class="split-body">
+      <div class="split-inner">
+        <div class="logo logo-lg"><span class="mark">◈</span> TravelNext</div>
+
+        <h1 class="display">Discover where you should go next.</h1>
+        <p class="lede">
+          Tell us where you've been. We'll learn what kind of traveller you are
+          and help you discover your next destination.
+        </p>
+
+        <div class="auth">
+          <button class="btn btn-outline" data-auth="google">
+            <span class="g-mark" aria-hidden="true">G</span> Continue with Google
+          </button>
+          <button class="btn btn-dark" data-auth="email">Continue with Email</button>
         </div>
-        <h1>Your next trip could be <em id="hero-lead">somewhere new</em></h1>
-        <p class="hero-sub">
-          Recommendations learned from where you have already been and from
-          measured destination characteristics — not from a list of the world's
-          most famous cities.
+
+        <p class="fineprint">
+          By continuing, you agree to our <a href="#">Terms</a> and
+          <a href="#">Privacy Policy</a>.
+        </p>
+
+        <p class="demo-note">
+          Demo build — these buttons start the flow locally and collect no
+          credentials of any kind.
         </p>
       </div>
-
-      <aside class="signals">
-        <h2>Based on</h2>
-        <dl>
-          <div class="row"><dt>Trips in history</dt><dd id="sig-trips">0</dd></div>
-          <div class="row"><dt>Departing from</dt><dd id="sig-origin">—</dd></div>
-          <div class="row"><dt>Travelling</dt><dd id="sig-month">—</dd></div>
-          <div class="row"><dt>Budget</dt><dd id="sig-budget">—</dd></div>
-          <div class="row"><dt>Model</dt><dd id="sig-model">—</dd></div>
-        </dl>
-      </aside>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ------------------------------------------------ controls -->
-  <section class="controls">
+<!-- =================================================================== -->
+<!-- 2. WELCOME                                                          -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-welcome">
+  <div class="centred">
+    <div class="stepper"><span class="label">Step 1 of 3</span></div>
+    <h1 class="display">Let's get to know your travel history.</h1>
+    <p class="lede">
+      Your past trips help us understand what destinations you might enjoy next.
+    </p>
+    <button class="btn btn-dark" data-go="history">Start</button>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- 3. TRAVEL HISTORY                                                   -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-history">
+  <div class="flow">
+    <header class="flow-head">
+      <span class="label">Step 1 of 3</span>
+      <div class="progress"><span style="width:33%"></span></div>
+    </header>
+
+    <h1 class="display">Where have you been?</h1>
+    <p class="lede">
+      Add cities you've visited. The more you tell us, the better we can
+      understand your travel style.
+    </p>
+
+    <div class="search" id="search-wrap">
+      <input
+        type="text"
+        id="city-search"
+        placeholder="Search for a city…"
+        autocomplete="off"
+        aria-label="Search for a city"
+      />
+      <ul class="suggestions" id="suggestions" hidden></ul>
+    </div>
+
+    <ul class="visited-list" id="visited-list"></ul>
+
+    <p class="empty-note" id="history-empty">
+      Try Amsterdam, Berlin, Prague, Paris, Barcelona or Rome.
+    </p>
+
+    <div class="flow-foot">
+      <span class="label" id="history-count"></span>
+      <button class="btn btn-dark" id="history-continue" disabled data-go="map">
+        Continue
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- 4. TRAVEL HISTORY MAP                                               -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-map">
+  <div class="flow">
+    <header class="flow-head">
+      <span class="label">Step 2 of 3</span>
+      <div class="progress"><span style="width:66%"></span></div>
+    </header>
+
+    <h1 class="display">Your travel history</h1>
+    <p class="lede" id="map-summary"></p>
+
+    <div class="map-frame">
+      <div id="map"></div>
+    </div>
+    <p class="map-note">
+      Tiles © OpenStreetMap contributors. Your visited cities are marked in
+      charcoal, in the order you added them.
+    </p>
+
+    <div class="flow-foot">
+      <button class="btn btn-ghost" data-go="history">Back</button>
+      <button class="btn btn-dark" data-go="style">Continue</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- 5. TRAVEL STYLE                                                     -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-style">
+  <div class="flow">
+    <header class="flow-head">
+      <span class="label">Step 3 of 3</span>
+      <div class="progress"><span style="width:100%"></span></div>
+    </header>
+
+    <h1 class="display">What do you enjoy when you travel?</h1>
+    <p class="lede">Optional — pick as many as you like.</p>
+
+    <div class="chips" id="interests"></div>
+
+    <h2 class="sub">How long are your typical trips?</h2>
+    <div class="chips" id="durations"></div>
+
+    <h2 class="sub">What's your usual budget?</h2>
+    <div class="chips chips-budget" id="budgets"></div>
+
+    <div class="flow-foot">
+      <button class="btn btn-ghost" data-go="map">Back</button>
+      <button class="btn btn-dark" data-go="building">Build my travel profile</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- 6. BUILDING PROFILE                                                 -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-building">
+  <div class="centred">
+    <h1 class="display">Building your travel profile</h1>
+    <p class="lede">
+      TravelNext is analysing your destinations and preferences to understand
+      what places might fit you.
+    </p>
+
+    <!-- A quiet route being drawn between the cities the user actually
+         entered: geographic, not a spinner. -->
+    <svg class="route" id="route-anim" viewBox="0 0 420 150" aria-hidden="true"></svg>
+
+    <ul class="steps" id="build-steps">
+      <li data-step="0">Analysing your destinations</li>
+      <li data-step="1">Understanding your travel style</li>
+      <li data-step="2">Finding similar destinations</li>
+      <li data-step="3">Preparing recommendations</li>
+    </ul>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- 7. TRAVEL PROFILE                                                   -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-profile">
+  <div class="flow">
+    <span class="label">Inferred from your travel history</span>
+    <h1 class="display">Your travel profile</h1>
+
+    <div class="profile-grid">
+      <div class="profile-block">
+        <h2 class="sub">You seem to enjoy</h2>
+        <ul class="trait-list" id="profile-traits"></ul>
+        <p class="hint" id="trait-hint"></p>
+      </div>
+
+      <div class="profile-block">
+        <h2 class="sub">Your typical trip</h2>
+        <p class="profile-value" id="profile-duration">—</p>
+
+        <h2 class="sub">Your preferred region</h2>
+        <p class="profile-value" id="profile-region">—</p>
+
+        <h2 class="sub">Your usual budget</h2>
+        <p class="profile-value" id="profile-budget">—</p>
+      </div>
+    </div>
+
+    <h2 class="sub">Destinations you've enjoyed</h2>
+    <div class="trip-row" id="profile-visited"></div>
+
+    <div class="flow-foot">
+      <button class="btn btn-ghost" data-go="style">Adjust preferences</button>
+      <button class="btn btn-dark" data-go="recommend">Show my recommendations</button>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- 8. RECOMMENDATIONS                                                  -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-recommend">
+  <header class="site-header">
     <div class="shell">
-      <div class="control">
-        <span class="label">Month</span>
-        <select id="month"></select>
-      </div>
-      <div class="control">
-        <span class="label">Days</span>
-        <input type="number" id="duration" min="2" max="21" value="5" style="width:70px" />
-      </div>
-      <div class="control">
-        <span class="label">Budget</span>
-        <select id="budget">
-          <option value="budget">Budget</option>
-          <option value="mid-range" selected>Mid-range</option>
-          <option value="expensive">Expensive</option>
-        </select>
-      </div>
-      <div class="control">
-        <span class="label">Model</span>
-        <select id="model"></select>
-      </div>
-      <div class="control">
-        <span class="label">Sort by</span>
-        <div class="segmented" id="sort">
-          <button data-sort="match" class="is-active">Match</button>
-          <button data-sort="budget">Budget</button>
-          <button data-sort="nearest">Nearest</button>
-        </div>
-      </div>
+      <div class="logo"><span class="mark">◈</span> TravelNext</div>
+      <nav class="site-nav" id="nav">
+        <button data-view="recommend" class="is-active">Recommendations</button>
+        <button data-view="trips">My trips</button>
+      </nav>
     </div>
-  </section>
+  </header>
 
   <div class="shell">
+    <section class="rec-head">
+      <h1 class="display">Where should you go next?</h1>
+      <p class="lede">Based on your travel history and preferences.</p>
+    </section>
+
+    <!-- 10. EXPLORE / REFINE -->
+    <section class="refine">
+      <div class="refine-grid">
+        <label class="field">
+          <span class="label">Starting from</span>
+          <select id="r-origin"></select>
+        </label>
+        <label class="field">
+          <span class="label">Trip length</span>
+          <select id="r-duration"></select>
+        </label>
+        <label class="field">
+          <span class="label">Budget</span>
+          <select id="r-budget"></select>
+        </label>
+        <label class="field">
+          <span class="label">Month</span>
+          <select id="r-month"></select>
+        </label>
+        <label class="field">
+          <span class="label">Model</span>
+          <select id="r-model"></select>
+        </label>
+      </div>
+
+      <div class="refine-interests">
+        <span class="label">Interests</span>
+        <div class="chips chips-sm" id="r-interests"></div>
+      </div>
+
+      <div class="refine-foot">
+        <button class="btn btn-dark" id="update-recs">Update recommendations</button>
+        <span class="label" id="rec-status"></span>
+      </div>
+    </section>
+
     <div id="notice"></div>
-
-    <!-- ------------------------------------------------ recommendations -->
-    <section id="view-recommend">
-      <div class="section-head">
-        <h2>Your next destinations</h2>
-        <span class="label" id="result-count"></span>
-      </div>
-      <div class="cards" id="cards"></div>
-    </section>
-
-    <!-- ------------------------------------------------ how we chose -->
-    <section class="how" id="view-how">
-      <span class="label">How we chose these</span>
-      <div class="signposts">
-        <div class="signpost">
-          <h3>What you have liked</h3>
-          <p>
-            Every destination is described by what is actually mapped there in
-            OpenStreetMap — museums, bars, parks, monuments, beach area — and
-            compared against the character of the places you have already
-            visited.
-          </p>
-        </div>
-        <div class="signpost">
-          <h3>Travellers like you</h3>
-          <p>
-            Item-to-item collaborative filtering finds destinations that are
-            repeatedly visited by people whose histories resemble yours, which
-            surfaces pairings that attributes alone would miss.
-          </p>
-        </div>
-        <div class="signpost">
-          <h3>When and where you are going</h3>
-          <p>
-            Climate normals decide whether the month suits the place, country
-            price levels match your budget, and great-circle distance keeps a
-            short trip from sending you across the world.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------ past trips -->
-    <section class="trips" id="view-trips">
-      <div class="section-head">
-        <h2>Where you have been</h2>
-        <span class="label">Shapes every recommendation above</span>
-      </div>
-      <div class="trip-row" id="trip-row"></div>
-    </section>
+    <div class="cards" id="cards"></div>
   </div>
-</main>
 
-<footer class="site-footer">
+  <footer class="site-footer">
+    <div class="shell">
+      <p>
+        Destination data: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0) ·
+        <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (ODbL) ·
+        <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ·
+        <a href="https://data.worldbank.org/">World Bank</a> (CC BY 4.0) ·
+        text and photography from <a href="https://en.wikipedia.org/">Wikipedia</a>
+        and Wikimedia Commons (CC BY-SA / public domain).
+      </p>
+      <p>
+        <strong>Traveller interaction data is synthetic.</strong> No real
+        person's travel history is used anywhere in this application.
+      </p>
+    </div>
+  </footer>
+</section>
+
+<!-- =================================================================== -->
+<!-- 11. MY TRIPS                                                        -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-trips">
+  <header class="site-header">
+    <div class="shell">
+      <div class="logo"><span class="mark">◈</span> TravelNext</div>
+      <nav class="site-nav" id="nav-trips">
+        <button data-view="recommend">Recommendations</button>
+        <button data-view="trips" class="is-active">My trips</button>
+      </nav>
+    </div>
+  </header>
+
   <div class="shell">
-    <p>
-      Destination data: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0) ·
-      <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (ODbL) ·
-      <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ·
-      <a href="https://data.worldbank.org/">World Bank</a> (CC BY 4.0) ·
-      text and photography from <a href="https://en.wikipedia.org/">Wikipedia</a> and
-      Wikimedia Commons (CC BY-SA / public domain).
-    </p>
-    <p>
-      <strong>Traveller interaction data is synthetic.</strong> No real person's
-      travel history is used anywhere in this application; the collaborative
-      signals demonstrate the mechanism, not real travel behaviour.
-    </p>
-  </div>
-</footer>
+    <section class="rec-head">
+      <h1 class="display">My trips</h1>
+      <p class="lede">
+        Every city you add reshapes your profile and your recommendations.
+      </p>
+    </section>
 
+    <div class="search search-inline" id="trips-search-wrap">
+      <input
+        type="text"
+        id="trips-search"
+        placeholder="+ Add destination"
+        autocomplete="off"
+        aria-label="Add a destination"
+      />
+      <ul class="suggestions" id="trips-suggestions" hidden></ul>
+    </div>
+
+    <ol class="timeline" id="trips-timeline"></ol>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- 9. EXPLANATION (drawer)                                             -->
+<!-- =================================================================== -->
+<div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-modal="true" role="dialog">
+  <button class="drawer-close" id="drawer-close" aria-label="Close">×</button>
+  <div id="drawer-content"></div>
+</aside>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

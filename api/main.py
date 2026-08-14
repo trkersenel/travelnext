@@ -25,6 +25,8 @@ from api.schemas import (
     DestinationListResponse,
     DestinationSummary,
     HealthResponse,
+    ProfileRequest,
+    ProfileResponse,
     RecommendRequest,
     RecommendResponse,
 )
@@ -222,6 +224,19 @@ def recommend_next(
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Unknown destination: {destination_id}")
     return RecommendResponse(**payload)
+
+
+@app.post("/profile", response_model=ProfileResponse, tags=["recommend"])
+def travel_profile(
+    request: ProfileRequest, service: RecommendationService = Depends(service_dependency)
+) -> ProfileResponse:
+    """Infer a travel profile from a visit history.
+
+    Traits are the categories where the traveller's history sits *above the
+    catalog norm*, so the profile describes this traveller rather than
+    restating that large cities have many museums.
+    """
+    return ProfileResponse(**service.travel_profile(request.history))
 
 
 @app.get("/models", tags=["meta"])

@@ -207,3 +207,82 @@ def test_models_endpoint(client) -> None:
     assert set(payload["hybrid_weights"]) == {
         "content", "collaborative", "popularity", "context"
     }
+
+
+# ------------------------------------------------------------------ profile
+def test_profile_infers_traits_from_history(client) -> None:
+    payload = client.post(
+        "/profile", json={"history": ["amsterdam-nl", "berlin-de", "prague-cz"]}
+    ).json()
+    assert payload["n_visited"] == 3
+    assert payload["traits"], "a three-city history should yield at least one trait"
+    assert len(payload["visited"]) == 3
+    for trait in payload["traits"]:
+        # Traits are only reported when the history leans above the norm.
+        assert trait["deviation"] > 0
+        assert trait["label"]
+
+
+def test_profile_distinguishes_different_histories(client) -> None:
+    """The whole point of standardising: two histories must differ."""
+    city = client.post(
+        "/profile", json={"history": ["amsterdam-nl", "berlin-de", "prague-cz"]}
+    ).json()
+    coast = client.post(
+        "/profile", json={"history": ["barcelona-es", "valencia-es", "lisbon-pt"]}
+    ).json()
+    assert [t["category"] for t in city["traits"]] != [t["category"] for t in coast["traits"]]
+
+
+def test_profile_empty_history(client) -> None:
+    payload = client.post("/profile", json={"history": []}).json()
+    assert payload["n_visited"] == 0
+    assert payload["traits"] == []
+
+
+def test_profile_ignores_unknown_ids(client) -> None:
+    payload = client.post(
+        "/profile", json={"history": ["atlantis-xx", "amsterdam-nl"]}
+    ).json()
+    assert payload["n_visited"] == 1
+
+
+def test_profile_reports_region_and_cost(client) -> None:
+    payload = client.post("/profile", json={"history": ["amsterdam-nl", "berlin-de"]}).json()
+    assert payload["region"]
+    assert payload["cost_band"] in {"budget", "mid-range", "expensive"}
+
+
+# --------------------------------------------------------------- interests
+@pytest.mark.parametrize(
+    "interest,expected",
+    [
+        ("history", "heritage"),
+        ("local_life", "walkability"),
+        ("photography", "outdoor"),
+        ("outdoor", "nature"),
+    ],
+)
+def test_onboarding_interests_map_to_measured_categories(
+    dataset, split, interest, expected
+) -> None:
+    """Product-facing interest names must resolve to real OSM categories."""
+    service = RecommendationService(dataset=dataset, split=split)
+    assert expected in service.resolve_interests([interest])
+
+
+def test_unknown_interest_is_dropped(dataset, split) -> None:
+    service = RecommendationService(dataset=dataset, split=split)
+    assert service.resolve_interests(["teleportation"]) == []
+
+
+def test_interests_change_the_ranking(client) -> None:
+    beaches = client.post(
+        "/recommend", json={"history": [], "interests": ["beaches"], "k": 5}
+    ).json()
+    museums = client.post(
+        "/recommend", json={"history": [], "interests": ["museums", "history"], "k": 5}
+    ).json()
+    assert [r["destination_id"] for r in beaches["recommendations"]] != [
+        r["destination_id"] for r in museums["recommendations"]
+    ]

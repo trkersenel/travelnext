@@ -31,6 +31,7 @@ from src.models.context import ContextScorer
 from src.models.hybrid import HybridRecommender, weights_from_config
 from src.models.next_destination import NextDestinationRecommender
 from src.models.popularity import PopularityRecommender
+from src.preprocessing.features import PROFILE_CATEGORIES
 from src.ranking.features import RankingFeatureBuilder
 from src.ranking.ltr import LearningToRankRecommender
 from src.utils.logging_utils import get_logger
@@ -241,7 +242,9 @@ class RecommendationService:
             month=month,
             trip_duration_days=trip_duration_days,
             budget=budget,
-            interests=list(interests),
+            # Onboarding interests use product names ("Local life"); the models
+            # only know measured OSM categories. Translate at the boundary.
+            interests=self.resolve_interests(interests),
         )
 
         selected = self._pick_model(model, request)
@@ -318,6 +321,114 @@ class RecommendationService:
             reasons=self.explainer.explain(request, destination_id) if explain else [],
             attributes=attributes,
         )
+
+    # ------------------------------------------------------------- profile
+    # Human labels for the measured OSM categories, plus the onboarding
+    # interests that map onto them. Several UI interests share an underlying
+    # measurement -- "Photography" and "Outdoor activities" both rest on
+    # viewpoints and peaks -- and that is stated here rather than papered over
+    # with an invented feature.
+    TRAIT_LABELS: Dict[str, str] = {
+        "museums": "Museums and galleries",
+        "culture": "Culture and performance",
+        "heritage": "History and heritage",
+        "architecture": "Architecture",
+        "nightlife": "Nightlife",
+        "food": "Food and cafés",
+        "nature": "Parks and green space",
+        "beaches": "Beaches",
+        "outdoor": "Outdoors and viewpoints",
+        "family": "Family attractions",
+        "shopping": "Markets and shopping",
+        "walkability": "Walkable streets",
+    }
+
+    INTEREST_MAP: Dict[str, tuple] = {
+        "architecture": ("architecture",),
+        "culture": ("culture",),
+        "food": ("food",),
+        "nightlife": ("nightlife",),
+        "museums": ("museums",),
+        "nature": ("nature",),
+        "history": ("heritage",),
+        "beaches": ("beaches",),
+        "shopping": ("shopping",),
+        "local_life": ("walkability", "food"),
+        "photography": ("outdoor", "architecture"),
+        "outdoor": ("outdoor", "nature"),
+    }
+
+    def resolve_interests(self, interests: Sequence[str]) -> List[str]:
+        """Map onboarding interest names onto measured OSM categories."""
+        resolved: List[str] = []
+        for interest in interests:
+            for category in self.INTEREST_MAP.get(str(interest).lower(), ()):
+                if category not in resolved:
+                    resolved.append(category)
+        return resolved
+
+    def travel_profile(self, history: Sequence[str]) -> Dict[str, Any]:
+        """Infer a travel profile from the destinations a traveller has visited.
+
+        The traits are the categories where the visited set deviates *above the
+        catalog norm*, not simply the categories that score highly. That
+        distinction matters: every major European city sits in the top decile
+        of museums, culture, nightlife and food, so raw percentiles describe
+        "a big city" rather than this traveller. Standardising first is what
+        separates a museum-and-heritage history (Amsterdam, Berlin, Prague,
+        Paris) from a coastal one (Barcelona, Lisbon, Nice).
+        """
+        known, _ = filter_known_destinations(self.dataset, list(history))
+        indices = self.dataset.indices(known)
+        if indices.size == 0:
+            return {"n_visited": 0, "traits": [], "visited": []}
+
+        frame = self.dataset.destinations
+        columns = [f"profile_{name}" for name in PROFILE_CATEGORIES]
+        profiles = frame[columns].astype("float64")
+        profiles = profiles.fillna(profiles.mean())
+        spread = profiles.std().replace(0.0, 1.0)
+        standardised = (profiles - profiles.mean()) / spread
+
+        deviation = standardised.iloc[indices].mean().sort_values(ascending=False)
+        traits = [
+            {
+                "category": name.replace("profile_", ""),
+                "label": self.TRAIT_LABELS.get(name.replace("profile_", ""), name),
+                "deviation": round(float(value), 3),
+            }
+            # Only report a trait when the history genuinely leans that way.
+            for name, value in deviation.items()
+            if value > 0.15
+        ][:5]
+
+        visited_rows = frame.iloc[indices]
+        regions = visited_rows["region"].value_counts()
+        continents = visited_rows["continent"].value_counts()
+        cost_bands = visited_rows["cost_category"].value_counts()
+
+        return {
+            "n_visited": int(indices.size),
+            "traits": traits,
+            "region": str(regions.index[0]) if len(regions) else "",
+            "continent": str(continents.index[0]) if len(continents) else "",
+            "cost_band": str(cost_bands.index[0]) if len(cost_bands) else "",
+            "walkable": bool(
+                float(visited_rows["score_walkability"].mean(skipna=True) or 0) > 0.7
+            ),
+            "visited": [
+                {
+                    "destination_id": str(row["destination_id"]),
+                    "city": str(row["city"]),
+                    "country": str(row["country"]),
+                    "country_code": str(row["country_code"]),
+                    "image_url": str(row.get("image_url", "") or ""),
+                    "latitude": float(row["latitude"]),
+                    "longitude": float(row["longitude"]),
+                }
+                for _, row in visited_rows.iterrows()
+            ],
+        }
 
     # ------------------------------------------------------------- catalog
     def destinations_frame(self) -> pd.DataFrame:
