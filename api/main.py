@@ -23,6 +23,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from api.schemas import (
+    CountryItem,
+    CountryListResponse,
     DestinationListResponse,
     DestinationSummary,
     HealthResponse,
@@ -33,6 +35,7 @@ from api.schemas import (
 )
 from api import auth_routes
 from src.auth import build_oauth_client, load_auth_settings
+from src.data.countries import load_countries
 from src.config import load_config
 from src.service import RecommendationService, get_service
 from src.storage import TravellerStore
@@ -260,6 +263,44 @@ def recommend_next(
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Unknown destination: {destination_id}")
     return RecommendResponse(**payload)
+
+
+@app.get("/countries", response_model=CountryListResponse, tags=["catalog"])
+def list_countries(
+    service: RecommendationService = Depends(service_dependency),
+    visited: Optional[str] = Query(
+        None, description="Comma-separated ISO alpha-2 codes to mark as visited."
+    ),
+) -> CountryListResponse:
+    """Every mappable country, optionally flagged with the traveller's visits.
+
+    ``visited`` is accepted as a query parameter so the guest flow — which
+    keeps its history in the browser rather than the database — gets the same
+    response shape as a signed-in user.
+    """
+    marked = {
+        code.strip().upper() for code in (visited or "").split(",") if code.strip()
+    }
+    # How many catalog cities each country has, so the UI can tell a country we
+    # can recommend within apart from one we can only colour in.
+    counts = service.destinations_frame()["country_code"].value_counts().to_dict()
+
+    countries = [
+        CountryItem(
+            country_code=entry["country_code"],
+            name=entry["name"],
+            continent=entry["continent"],
+            region=entry["region"],
+            visited=entry["country_code"] in marked,
+            cities_in_catalog=int(counts.get(entry["country_code"], 0)),
+        )
+        for entry in load_countries()
+    ]
+    return CountryListResponse(
+        total=len(countries),
+        visited_count=sum(1 for c in countries if c.visited),
+        countries=countries,
+    )
 
 
 @app.post("/profile", response_model=ProfileResponse, tags=["recommend"])

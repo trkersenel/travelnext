@@ -1423,3 +1423,144 @@ input:focus {
 @media (max-width: 640px) {
   .account .who { display: none; }
 }
+
+/* ====================================================================== */
+/* Profile control (top right)                                            */
+/* ====================================================================== */
+.profile { position: relative; }
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--charcoal);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.avatar svg { width: 21px; height: 21px; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar:hover { border-color: var(--charcoal); }
+.avatar[aria-expanded="true"] { border-color: var(--terracotta); }
+
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 230px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lift);
+  padding: 6px;
+  z-index: 60;
+}
+
+.profile-head {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+  display: grid;
+  gap: 2px;
+}
+
+.profile-name { font-weight: 500; font-size: 15px; }
+
+.profile-sub {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.profile-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--charcoal);
+}
+
+.profile-item:hover { background: var(--ivory); }
+.profile-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+/* ====================================================================== */
+/* Countries visited — world map                                          */
+/* ====================================================================== */
+.world-frame { margin-bottom: 12px; }
+
+#world-map {
+  height: 520px;
+  background: #eef0f2;   /* ocean */
+}
+
+/* The basemap is drawn from vectors, not tiles: no tile requests, no
+   attribution clutter, and full control over the palette. */
+#world-map .leaflet-container { background: #eef0f2; font-family: var(--font-ui); }
+
+.country-stats {
+  display: flex;
+  gap: 34px;
+  align-items: baseline;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.stat-value .stat-of {
+  font-size: 17px;
+  color: var(--muted);
+  font-family: var(--font-ui);
+}
+
+.stat-block { display: grid; gap: 5px; }
+
+.country-controls { margin: 26px 0 8px; }
+
+.country-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 72px; }
+
+.country-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 7px 10px 7px 12px;
+  font-size: 14px;
+}
+
+.country-chip .cc-remove {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.country-chip .cc-remove:hover { color: var(--terracotta); }
+.country-chip .cc-count { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+@media (max-width: 640px) {
+  #world-map { height: 380px; }
+  .country-stats { gap: 22px; }
+  .stat-value { font-size: 31px; }
+  .profile-menu { right: -8px; }
+}

@@ -15,6 +15,7 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
 from src.auth import safe_next_path, user_from_claims
+from src.data.countries import normalise
 from src.service import RecommendationService
 from src.storage import TravellerStore
 from src.utils.logging_utils import get_logger
@@ -161,6 +162,52 @@ def write_trips(
     service: RecommendationService = request.app.state.service_getter()
     known = [d for d in payload.history if d in service.dataset.index_of]
     return TripsPayload(history=store.set_trips(user["sub"], known))
+
+
+@router.get("/me/countries")
+def read_countries(
+    user: Dict[str, Any] = Depends(current_user),
+    store: TravellerStore = Depends(get_store),
+) -> Dict[str, List[str]]:
+    """Countries the signed-in traveller has marked visited."""
+    return {"countries": store.get_countries(user["sub"])}
+
+
+@router.put("/me/countries")
+def write_countries(
+    payload: Dict[str, List[str]],
+    user: Dict[str, Any] = Depends(current_user),
+    store: TravellerStore = Depends(get_store),
+) -> Dict[str, List[str]]:
+    """Replace the visited-country set, dropping codes that are not mappable."""
+    codes = [c for c in (normalise(x) for x in payload.get("countries", [])) if c]
+    return {"countries": store.set_countries(user["sub"], codes)}
+
+
+@router.post("/me/countries/{country_code}")
+def add_country(
+    country_code: str,
+    user: Dict[str, Any] = Depends(current_user),
+    store: TravellerStore = Depends(get_store),
+) -> Dict[str, List[str]]:
+    """Mark one country visited."""
+    code = normalise(country_code)
+    if not code:
+        raise HTTPException(status_code=404, detail=f"Unknown country: {country_code}")
+    return {"countries": store.add_country(user["sub"], code)}
+
+
+@router.delete("/me/countries/{country_code}")
+def remove_country(
+    country_code: str,
+    user: Dict[str, Any] = Depends(current_user),
+    store: TravellerStore = Depends(get_store),
+) -> Dict[str, List[str]]:
+    """Un-mark one country."""
+    code = normalise(country_code)
+    if not code:
+        raise HTTPException(status_code=404, detail=f"Unknown country: {country_code}")
+    return {"countries": store.remove_country(user["sub"], code)}
 
 
 @router.get("/me/preferences", response_model=PreferencesPayload)

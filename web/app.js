@@ -67,6 +67,15 @@ const state = {
   map: null,
   user: null,        // signed-in traveller, or null when anonymous
   loginEnabled: false,
+
+  // Countries visited. `countriesPicked` holds explicit choices only; the
+  // countries implied by cities in the trip history are derived, never stored,
+  // so the two views can never disagree.
+  countriesPicked: new Set(),
+  countryCatalog: [],
+  countryByCode: new Map(),
+  worldMap: null,
+  worldLayer: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -189,6 +198,8 @@ async function loadSession() {
       state.history = trips.history;
       state.origin = state.history[state.history.length - 1];
     }
+    const stored = await api("/me/countries").catch(() => ({ countries: [] }));
+    state.countriesPicked = new Set(stored.countries || []);
     if (preferences.interests) state.interests = preferences.interests;
     if (preferences.duration_days) state.duration = preferences.duration_days;
     if (preferences.budget) state.budget = preferences.budget;
@@ -201,7 +212,7 @@ async function loadSession() {
 
 const SCREENS = [
   "login", "welcome", "history", "map", "style",
-  "building", "profile", "recommend", "trips",
+  "building", "profile", "recommend", "trips", "countries",
 ];
 
 function show(name) {
@@ -215,6 +226,9 @@ function show(name) {
   if (name === "profile") renderProfile();
   if (name === "recommend") renderRefine();
   if (name === "trips") renderTimeline();
+  if (name === "countries") renderCountries();
+  // The menu shows a live trip count, so refresh it on every navigation.
+  renderProfileMenus();
 }
 
 /* ----------------------------------------------------------------- utils */
@@ -359,6 +373,7 @@ function addCity(id) {
   state.origin = id; // most recent trip becomes the default starting point
   renderVisited();
   renderTimeline();
+  renderProfileMenus();
   syncTrips();
 }
 
@@ -367,6 +382,7 @@ function removeCity(id) {
   if (state.origin === id) state.origin = state.history[state.history.length - 1] || null;
   renderVisited();
   renderTimeline();
+  renderProfileMenus();
   syncTrips();
 }
 
@@ -819,6 +835,315 @@ async function refreshAfterHistoryChange() {
   await fetchRecommendations();
 }
 
+
+
+/* ============================================================ countries */
+
+/**
+ * Every country the traveller counts as visited.
+ *
+ * Two sources are unioned: countries they ticked explicitly, and the countries
+ * of the cities already in their trip history. Deriving the second means the
+ * map is never out of step with the trips list — adding Amsterdam colours the
+ * Netherlands without asking the user to say it twice.
+ */
+function visitedCountryCodes() {
+  const fromCities = state.history
+    .map((id) => state.byId.get(id))
+    .filter(Boolean)
+    .map((d) => d.country_code);
+  return new Set([...state.countriesPicked, ...fromCities]);
+}
+
+/** Countries implied by a city, which therefore cannot be removed directly. */
+function impliedCountryCodes() {
+  return new Set(
+    state.history.map((id) => state.byId.get(id)).filter(Boolean).map((d) => d.country_code)
+  );
+}
+
+async function loadCountryCatalog() {
+  const data = await api("/countries");
+  state.countryCatalog = data.countries;
+  state.countryByCode = new Map(data.countries.map((c) => [c.country_code, c]));
+}
+
+function countryStyle(code, visited) {
+  return visited
+    ? { fillColor: "#c4622d", fillOpacity: 0.88, color: "#ffffff", weight: 0.6 }
+    : { fillColor: "#dfd8cc", fillOpacity: 0.9, color: "#ffffff", weight: 0.6 };
+}
+
+async function drawWorldMap() {
+  const container = $("world-map");
+  if (typeof L === "undefined" || !container) return;
+
+  const visited = visitedCountryCodes();
+
+  if (!state.worldMap) {
+    state.worldMap = L.map("world-map", {
+      scrollWheelZoom: false,
+      attributionControl: false,
+      worldCopyJump: true,
+      minZoom: 1,
+    }).setView([25, 8], 2);
+
+    // No tile layer: the basemap IS the country polygons. That keeps the look
+    // flat and editorial, avoids 200+ tile requests, and means the map works
+    // with no network at all once the GeoJSON is cached.
+    const geojson = await fetch("/static/countries.geojson").then((r) => r.json());
+
+    state.worldLayer = L.geoJSON(geojson, {
+      style: (feature) => countryStyle(feature.properties.iso, visited.has(feature.properties.iso)),
+      onEachFeature: (feature, layer) => {
+        const { iso, name } = feature.properties;
+        layer.bindTooltip(name, { sticky: true });
+        layer.on("click", () => toggleCountry(iso));
+        layer.on("mouseover", () => layer.setStyle({ weight: 1.6, color: "#2a1f1b" }));
+        layer.on("mouseout", () =>
+          layer.setStyle(countryStyle(iso, visitedCountryCodes().has(iso)))
+        );
+      },
+    }).addTo(state.worldMap);
+  } else {
+    repaintWorldMap();
+  }
+
+  // Same zero-width trap as the history map: the screen is hidden when the
+  // map is created, so Leaflet measures the container as 0x0.
+  const fitWhenSized = (attempt = 0) => {
+    if (container.clientWidth < 80 && attempt < 30) {
+      requestAnimationFrame(() => fitWhenSized(attempt + 1));
+      return;
+    }
+    state.worldMap.invalidateSize();
+  };
+  fitWhenSized();
+}
+
+function repaintWorldMap() {
+  if (!state.worldLayer) return;
+  const visited = visitedCountryCodes();
+  state.worldLayer.eachLayer((layer) => {
+    const iso = layer.feature.properties.iso;
+    layer.setStyle(countryStyle(iso, visited.has(iso)));
+  });
+}
+
+async function toggleCountry(code) {
+  const implied = impliedCountryCodes();
+  if (implied.has(code)) {
+    const country = state.countryByCode.get(code);
+    notice(
+      `${country ? country.name : code} is on your map because of a city in your trips. ` +
+        "Remove the city from My trips to clear it."
+    );
+    return;
+  }
+  if (state.countriesPicked.has(code)) {
+    state.countriesPicked.delete(code);
+  } else {
+    state.countriesPicked.add(code);
+  }
+  await persistCountries();
+  renderCountries();
+}
+
+/** Push the explicit picks to the server when the traveller is signed in. */
+async function persistCountries() {
+  if (!state.user) return;
+  try {
+    await api("/me/countries", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ countries: [...state.countriesPicked] }),
+    });
+  } catch (error) {
+    notice(`Could not save your countries: ${error.message}`);
+  }
+}
+
+function renderCountries() {
+  const visited = visitedCountryCodes();
+  const implied = impliedCountryCodes();
+  const total = state.countryCatalog.length || 175;
+
+  const continents = new Set(
+    [...visited].map((c) => (state.countryByCode.get(c) || {}).continent).filter(Boolean)
+  );
+
+  $("country-stats").innerHTML = `
+    <div class="stat-block">
+      <span class="stat-value">${visited.size}<span class="stat-of"> / ${total}</span></span>
+      <span class="label">Countries visited</span>
+    </div>
+    <div class="stat-block">
+      <span class="stat-value">${Math.round((visited.size / total) * 100)}<span class="stat-of">%</span></span>
+      <span class="label">Of the world</span>
+    </div>
+    <div class="stat-block">
+      <span class="stat-value">${continents.size}<span class="stat-of"> / 6</span></span>
+      <span class="label">Continents</span>
+    </div>`;
+
+  const sorted = [...visited]
+    .map((code) => state.countryByCode.get(code) || { country_code: code, name: code })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  $("country-chips").innerHTML = sorted.length
+    ? sorted
+        .map((c) => {
+          const locked = implied.has(c.country_code);
+          return `<span class="country-chip">
+            ${flagEmoji(c.country_code)} ${c.name}
+            ${locked ? '<span class="cc-count">from trips</span>' : ""}
+            ${locked ? "" : `<button class="cc-remove" data-country-remove="${c.country_code}"
+                 aria-label="Remove ${c.name}">×</button>`}
+          </span>`;
+        })
+        .join("")
+    : '<p class="empty-note">No countries yet — tap the map or use the search above.</p>';
+
+  document.querySelectorAll("[data-country-remove]").forEach((button) =>
+    button.addEventListener("click", () => toggleCountry(button.dataset.countryRemove))
+  );
+
+  repaintWorldMap();
+  drawWorldMap();
+}
+
+function attachCountrySearch() {
+  const input = $("country-search");
+  const list = $("country-suggestions");
+  if (!input) return;
+
+  const close = () => {
+    list.hidden = true;
+    list.innerHTML = "";
+  };
+
+  input.addEventListener("input", () => {
+    const needle = input.value.trim().toLowerCase();
+    if (needle.length < 2) return close();
+    const visited = visitedCountryCodes();
+    const matches = state.countryCatalog
+      .filter((c) => !visited.has(c.country_code) && c.name.toLowerCase().includes(needle))
+      .slice(0, 7);
+    if (!matches.length) return close();
+    list.innerHTML = matches
+      .map(
+        (c) => `<li data-code="${c.country_code}">
+          <span style="font-size:20px">${flagEmoji(c.country_code)}</span>
+          <span><strong>${c.name}</strong>
+            <span class="s-country">${c.continent}</span></span>
+        </li>`
+      )
+      .join("");
+    list.hidden = false;
+  });
+
+  list.addEventListener("click", async (event) => {
+    const li = event.target.closest("li");
+    if (!li) return;
+    state.countriesPicked.add(li.dataset.code);
+    input.value = "";
+    close();
+    await persistCountries();
+    renderCountries();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("#country-search") && !event.target.closest("#country-suggestions")) {
+      close();
+    }
+  });
+}
+
+/* ============================================================== profile */
+
+function renderProfileMenus() {
+  const signedIn = Boolean(state.user);
+  document.querySelectorAll("[data-profile]").forEach((wrapper) => {
+    const name = wrapper.querySelector(".profile-name");
+    const sub = wrapper.querySelector(".profile-sub");
+    const signin = wrapper.querySelector("[data-profile-signin]");
+    const avatar = wrapper.querySelector(".avatar");
+
+    name.textContent = signedIn ? state.user.name || "Traveller" : "Guest";
+    sub.textContent = signedIn
+      ? state.user.email || "Signed in"
+      : `${state.history.length} trips · not signed in`;
+
+    if (signedIn && state.user.picture) {
+      avatar.innerHTML = `<img src="${state.user.picture}" alt="" referrerpolicy="no-referrer" />`;
+    }
+    if (signin) {
+      signin.textContent = signedIn ? "Sign out" : "Sign in to save";
+      signin.hidden = !signedIn && !state.loginEnabled;
+    }
+  });
+}
+
+function wireProfileMenus() {
+  document.querySelectorAll("[data-profile]").forEach((wrapper) => {
+    const avatar = wrapper.querySelector(".avatar");
+    const menu = wrapper.querySelector(".profile-menu");
+
+    avatar.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const open = menu.hidden;
+      // Only one menu open at a time across the app's three headers.
+      document.querySelectorAll(".profile-menu").forEach((m) => (m.hidden = true));
+      document
+        .querySelectorAll(".avatar")
+        .forEach((a) => a.setAttribute("aria-expanded", "false"));
+      menu.hidden = !open;
+      avatar.setAttribute("aria-expanded", String(open));
+    });
+
+    menu.querySelectorAll("[data-view]").forEach((item) =>
+      item.addEventListener("click", () => {
+        menu.hidden = true;
+        avatar.setAttribute("aria-expanded", "false");
+        show(item.dataset.view);
+      })
+    );
+
+    const signin = wrapper.querySelector("[data-profile-signin]");
+    if (signin) {
+      signin.addEventListener("click", async () => {
+        if (state.user) {
+          await api("/auth/logout", { method: "POST" }).catch(() => {});
+          state.user = null;
+          renderProfileMenus();
+          menu.hidden = true;
+        } else {
+          window.location.href = "/auth/login?next=/";
+        }
+      });
+    }
+
+    const reset = wrapper.querySelector("[data-profile-reset]");
+    if (reset) {
+      reset.addEventListener("click", () => {
+        state.history = [];
+        state.countriesPicked = new Set();
+        state.origin = null;
+        state.results = [];
+        menu.hidden = true;
+        renderVisited();
+        renderTimeline();
+        show("login");
+      });
+    }
+  });
+
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".profile-menu").forEach((m) => (m.hidden = true));
+    document.querySelectorAll(".avatar").forEach((a) => a.setAttribute("aria-expanded", "false"));
+  });
+}
+
 /* -------------------------------------------------------------- wiring */
 
 function wire() {
@@ -879,9 +1204,12 @@ function wire() {
   });
 
   // Cross-page navigation
-  document.querySelectorAll("#nav button, #nav-trips button").forEach((button) =>
+  document.querySelectorAll("#nav button, #nav-trips button, #nav-countries button").forEach((button) =>
     button.addEventListener("click", () => show(button.dataset.view))
   );
+
+  attachCountrySearch();
+  wireProfileMenus();
 
   // The brand in the header returns to the entry menu. History and
   // preferences are kept in state, so nothing is lost by going back.
@@ -903,6 +1231,7 @@ async function main() {
       api("/destinations?limit=500"),
       api("/models"),
     ]);
+    await loadCountryCatalog().catch(() => {});
     state.catalog = catalog.destinations;
     state.catalog.forEach((d) => state.byId.set(d.destination_id, d));
 

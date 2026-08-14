@@ -46,6 +46,14 @@ CREATE TABLE IF NOT EXISTS trips (
 
 CREATE INDEX IF NOT EXISTS trips_by_user ON trips(sub, position);
 
+CREATE TABLE IF NOT EXISTS countries (
+    sub            TEXT NOT NULL,
+    country_code   TEXT NOT NULL,
+    added_at       TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (sub, country_code),
+    FOREIGN KEY (sub) REFERENCES users(sub) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS preferences (
     sub            TEXT PRIMARY KEY,
     interests      TEXT NOT NULL DEFAULT '',
@@ -134,6 +142,45 @@ class TravellerStore:
                 [(sub, destination_id, index) for index, destination_id in enumerate(unique)],
             )
         return unique
+
+    # --------------------------------------------------------- countries
+    def get_countries(self, sub: str) -> List[str]:
+        """ISO alpha-2 codes of countries the traveller has marked visited."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT country_code FROM countries WHERE sub = ? ORDER BY added_at, country_code",
+                (sub,),
+            ).fetchall()
+        return [row["country_code"] for row in rows]
+
+    def add_country(self, sub: str, country_code: str) -> List[str]:
+        """Mark one country visited. Idempotent."""
+        with self._connect() as connection:
+            connection.execute(
+                "INSERT OR IGNORE INTO countries (sub, country_code) VALUES (?, ?)",
+                (sub, country_code.upper()),
+            )
+        return self.get_countries(sub)
+
+    def remove_country(self, sub: str, country_code: str) -> List[str]:
+        """Un-mark one country."""
+        with self._connect() as connection:
+            connection.execute(
+                "DELETE FROM countries WHERE sub = ? AND country_code = ?",
+                (sub, country_code.upper()),
+            )
+        return self.get_countries(sub)
+
+    def set_countries(self, sub: str, country_codes: List[str]) -> List[str]:
+        """Replace the whole set of visited countries."""
+        unique = list(dict.fromkeys(code.upper() for code in country_codes if code))
+        with self._connect() as connection:
+            connection.execute("DELETE FROM countries WHERE sub = ?", (sub,))
+            connection.executemany(
+                "INSERT INTO countries (sub, country_code) VALUES (?, ?)",
+                [(sub, code) for code in unique],
+            )
+        return self.get_countries(sub)
 
     # ------------------------------------------------------- preferences
     def get_preferences(self, sub: str) -> Dict[str, Any]:

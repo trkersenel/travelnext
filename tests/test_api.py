@@ -286,3 +286,79 @@ def test_interests_change_the_ranking(client) -> None:
     assert [r["destination_id"] for r in beaches["recommendations"]] != [
         r["destination_id"] for r in museums["recommendations"]
     ]
+
+
+# ----------------------------------------------------------------- countries
+def test_country_catalog_covers_the_world(client) -> None:
+    payload = client.get("/countries").json()
+    # Natural Earth 1:110m, minus the two entries without an ISO code.
+    assert payload["total"] == 175
+    codes = {c["country_code"] for c in payload["countries"]}
+    assert {"NL", "DE", "TR", "JP", "US", "BR", "ZA"} <= codes
+
+
+def test_country_catalog_marks_visited(client) -> None:
+    payload = client.get("/countries", params={"visited": "NL,DE"}).json()
+    assert payload["visited_count"] == 2
+    visited = {c["country_code"] for c in payload["countries"] if c["visited"]}
+    assert visited == {"NL", "DE"}
+
+
+def test_country_catalog_ignores_unknown_visited_codes(client) -> None:
+    payload = client.get("/countries", params={"visited": "NL,ZZ,,QQ"}).json()
+    assert payload["visited_count"] == 1
+
+
+def test_country_catalog_reports_city_coverage(client) -> None:
+    """The map spans more countries than the recommender has cities for."""
+    payload = client.get("/countries").json()
+    with_cities = [c for c in payload["countries"] if c["cities_in_catalog"] > 0]
+    without = [c for c in payload["countries"] if c["cities_in_catalog"] == 0]
+    assert with_cities and without
+    assert len(with_cities) < payload["total"]
+
+
+def test_country_catalog_has_continents(client) -> None:
+    payload = client.get("/countries").json()
+    lookup = {c["country_code"]: c for c in payload["countries"]}
+    assert lookup["NL"]["continent"] == "Europe"
+    assert lookup["JP"]["continent"] == "Asia"
+
+
+# --------------------------------------------------- per-user country store
+def test_me_countries_requires_sign_in(client) -> None:
+    assert client.get("/me/countries").status_code == 401
+    assert client.post("/me/countries/NL").status_code == 401
+
+
+def test_country_store_round_trip(tmp_path) -> None:
+    from src.storage import TravellerStore
+
+    store = TravellerStore(tmp_path / "t.db")
+    store.upsert_user({"sub": "u1", "email": "a@b.c", "name": "T", "picture": ""})
+
+    assert store.get_countries("u1") == []
+    assert store.add_country("u1", "nl") == ["NL"]          # normalised
+    assert store.add_country("u1", "NL") == ["NL"]          # idempotent
+    assert set(store.add_country("u1", "DE")) == {"NL", "DE"}
+    assert store.remove_country("u1", "DE") == ["NL"]
+    assert set(store.set_countries("u1", ["TR", "JP", "TR"])) == {"TR", "JP"}
+
+
+def test_deleting_a_user_removes_their_countries(tmp_path) -> None:
+    from src.storage import TravellerStore
+
+    store = TravellerStore(tmp_path / "t.db")
+    store.upsert_user({"sub": "u1", "email": "", "name": "", "picture": ""})
+    store.add_country("u1", "NL")
+    store.delete_user("u1")
+    assert store.get_countries("u1") == []
+
+
+def test_country_code_normalisation() -> None:
+    from src.data.countries import normalise
+
+    assert normalise("nl") == "NL"
+    assert normalise(" de ") == "DE"
+    assert normalise("ZZ") == ""
+    assert normalise("") == ""

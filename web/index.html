@@ -263,8 +263,31 @@
         </svg> Waygo</button>
       <nav class="site-nav" id="nav">
         <button data-view="recommend" class="is-active">Recommendations</button>
+        <button data-view="countries">My map</button>
         <button data-view="trips">My trips</button>
       </nav>
+        <div class="profile" data-profile>
+          <button class="avatar" id="avatar-rec" aria-haspopup="menu" aria-expanded="false"
+                  title="Your profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="8.2" r="3.6" />
+            <path d="M4.8 20c.6-3.8 3.5-6 7.2-6s6.6 2.2 7.2 6" />
+          </svg>
+          </button>
+          <div class="profile-menu" hidden>
+            <div class="profile-head">
+              <span class="profile-name">Guest</span>
+              <span class="profile-sub">Not signed in</span>
+            </div>
+            <button class="profile-item" data-view="countries">Countries visited</button>
+            <button class="profile-item" data-view="trips">My trips</button>
+            <button class="profile-item" data-view="profile">Travel profile</button>
+            <div class="profile-divider"></div>
+            <button class="profile-item" data-profile-signin>Sign in to save</button>
+            <button class="profile-item" data-profile-reset>Start over</button>
+          </div>
+        </div>
       <div class="account" id="account"></div>
     </div>
   </header>
@@ -353,8 +376,31 @@
         </svg> Waygo</button>
       <nav class="site-nav" id="nav-trips">
         <button data-view="recommend">Recommendations</button>
+        <button data-view="countries">My map</button>
         <button data-view="trips" class="is-active">My trips</button>
       </nav>
+        <div class="profile" data-profile>
+          <button class="avatar" id="avatar-trips" aria-haspopup="menu" aria-expanded="false"
+                  title="Your profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="8.2" r="3.6" />
+            <path d="M4.8 20c.6-3.8 3.5-6 7.2-6s6.6 2.2 7.2 6" />
+          </svg>
+          </button>
+          <div class="profile-menu" hidden>
+            <div class="profile-head">
+              <span class="profile-name">Guest</span>
+              <span class="profile-sub">Not signed in</span>
+            </div>
+            <button class="profile-item" data-view="countries">Countries visited</button>
+            <button class="profile-item" data-view="trips">My trips</button>
+            <button class="profile-item" data-view="profile">Travel profile</button>
+            <div class="profile-divider"></div>
+            <button class="profile-item" data-profile-signin>Sign in to save</button>
+            <button class="profile-item" data-profile-reset>Start over</button>
+          </div>
+        </div>
       <div class="account" id="account-trips"></div>
     </div>
   </header>
@@ -379,6 +425,86 @@
     </div>
 
     <ol class="timeline" id="trips-timeline"></ol>
+  </div>
+</section>
+
+
+<!-- =================================================================== -->
+<!-- 12. COUNTRIES VISITED (world map)                                   -->
+<!-- =================================================================== -->
+<section class="screen" id="screen-countries">
+  <header class="site-header">
+    <div class="shell">
+      <button class="logo logo-home" data-home title="Back to the menu"><svg class="mark" viewBox="0 0 100 100" fill="none" stroke="currentColor"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="50" cy="50" r="12.5" fill="currentColor" stroke="none" />
+          <path d="M49.5 46 L48.5 14" stroke-width="9.5" />
+          <path d="M46 47 L11 22" stroke-width="9" />
+          <path d="M55 45.5 L70.5 16.5" stroke-width="8" />
+          <path d="M55 50 L86 50" stroke-width="8" />
+          <path d="M55.5 54.5 L80 67" stroke-width="8" />
+          <path d="M50 55 L49 86" stroke-width="8.5" />
+          <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
+          <path d="M44.5 50 L17 50" stroke-width="8" />
+        </svg> Waygo</button>
+      <nav class="site-nav" id="nav-countries">
+        <button data-view="recommend">Recommendations</button>
+        <button data-view="countries" class="is-active">My map</button>
+        <button data-view="trips">My trips</button>
+      </nav>
+      <div class="profile" data-profile>
+        <button class="avatar" aria-haspopup="menu" aria-expanded="false" title="Your profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="8.2" r="3.6" />
+            <path d="M4.8 20c.6-3.8 3.5-6 7.2-6s6.6 2.2 7.2 6" />
+          </svg>
+        </button>
+        <div class="profile-menu" hidden>
+          <div class="profile-head">
+            <span class="profile-name">Guest</span>
+            <span class="profile-sub">Not signed in</span>
+          </div>
+          <button class="profile-item" data-view="countries">Countries visited</button>
+          <button class="profile-item" data-view="trips">My trips</button>
+          <button class="profile-item" data-view="profile">Travel profile</button>
+          <div class="profile-divider"></div>
+          <button class="profile-item" data-profile-signin>Sign in to save</button>
+          <button class="profile-item" data-profile-reset>Start over</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <section class="rec-head">
+      <h1 class="display">Countries you've been to</h1>
+      <p class="lede">
+        Tap a country on the map to add or remove it. Cities you add to your
+        trips colour their country in automatically.
+      </p>
+    </section>
+
+    <div class="country-stats" id="country-stats"></div>
+
+    <div class="map-frame world-frame">
+      <div id="world-map"></div>
+    </div>
+    <p class="map-note">
+      Boundaries from Natural Earth (public domain). Orange marks a country
+      you've visited.
+    </p>
+
+    <div class="country-controls">
+      <div class="search search-inline" id="country-search-wrap">
+        <input type="text" id="country-search" placeholder="+ Add a country"
+               autocomplete="off" aria-label="Add a country" />
+        <ul class="suggestions" id="country-suggestions" hidden></ul>
+      </div>
+    </div>
+
+    <h2 class="sub">Your countries</h2>
+    <div class="country-chips" id="country-chips"></div>
   </div>
 </section>
 

@@ -184,3 +184,28 @@ class ProfileResponse(BaseModel):
     cost_band: str = ""
     walkable: bool = False
     visited: List[VisitedItem] = Field(default_factory=list)
+
+
+class CountryItem(BaseModel):
+    """One mappable country."""
+
+    country_code: str
+    name: str
+    continent: str = ""
+    region: str = ""
+    visited: bool = False
+    cities_in_catalog: int = 0
+
+
+class CountryListResponse(BaseModel):
+    """The full country catalog, with the traveller's visits marked."""
+
+    total: int
+    visited_count: int
+    countries: List[CountryItem]
+
+
+class CountriesPayload(BaseModel):
+    """A set of visited country codes (ISO alpha-2)."""
+
+    countries: List[str] = Field(default_factory=list)
