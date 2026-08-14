@@ -457,7 +457,7 @@ function drawMap() {
   });
 
   if (coords.length > 1) {
-    L.polyline(coords, { color: "#2a1f1b", weight: 1, opacity: 0.35, dashArray: "3 5" })
+    L.polyline(coords, { color: token("--charcoal", "#2a1f1b"), weight: 1, opacity: 0.35, dashArray: "3 5" })
       .addTo(state.map);
   }
 
@@ -868,10 +868,17 @@ async function loadCountryCatalog() {
   state.countryByCode = new Map(data.countries.map((c) => [c.country_code, c]));
 }
 
+/** Read a CSS custom property, so map fills follow the active theme. */
+function token(name, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
 function countryStyle(code, visited) {
+  const stroke = token("--map-stroke", "#ffffff");
   return visited
-    ? { fillColor: "#c4622d", fillOpacity: 0.88, color: "#ffffff", weight: 0.6 }
-    : { fillColor: "#dfd8cc", fillOpacity: 0.9, color: "#ffffff", weight: 0.6 };
+    ? { fillColor: token("--map-visited", "#c4622d"), fillOpacity: 0.88, color: stroke, weight: 0.6 }
+    : { fillColor: token("--map-land", "#dfd8cc"), fillOpacity: 0.9, color: stroke, weight: 0.6 };
 }
 
 async function drawWorldMap() {
@@ -899,7 +906,7 @@ async function drawWorldMap() {
         const { iso, name } = feature.properties;
         layer.bindTooltip(name, { sticky: true });
         layer.on("click", () => toggleCountry(iso));
-        layer.on("mouseover", () => layer.setStyle({ weight: 1.6, color: "#2a1f1b" }));
+        layer.on("mouseover", () => layer.setStyle({ weight: 1.6, color: token("--charcoal", "#2a1f1b") }));
         layer.on("mouseout", () =>
           layer.setStyle(countryStyle(iso, visitedCountryCodes().has(iso)))
         );
@@ -1059,6 +1066,56 @@ function attachCountrySearch() {
   });
 }
 
+
+/* ================================================================ theme */
+
+/**
+ * Light / dark / system appearance.
+ *
+ * The choice is written to <html data-theme> because CSS custom properties
+ * are scoped to :root, and persisted to localStorage so it survives a reload.
+ * "system" removes the attribute and re-applies whatever the OS reports, and
+ * keeps listening — so a machine that flips to dark at sunset follows along
+ * without the user touching anything.
+ */
+const THEME_KEY = "waygo-theme";
+const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+function resolveTheme(choice) {
+  return choice === "system" ? (systemDark.matches ? "dark" : "light") : choice;
+}
+
+function applyTheme(choice) {
+  const resolved = resolveTheme(choice);
+  document.documentElement.setAttribute("data-theme", resolved);
+  localStorage.setItem(THEME_KEY, choice);
+  document.querySelectorAll("[data-theme-switch] button").forEach((button) =>
+    button.classList.toggle("is-active", button.dataset.themeSet === choice)
+  );
+  // Leaflet paints country fills inline, so a token change alone will not
+  // repaint them; ask the map to restyle with the new palette.
+  if (typeof repaintWorldMap === "function") repaintWorldMap();
+}
+
+function currentThemeChoice() {
+  return localStorage.getItem(THEME_KEY) || "system";
+}
+
+function wireTheme() {
+  applyTheme(currentThemeChoice());
+  document.querySelectorAll("[data-theme-switch]").forEach((group) =>
+    group.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-theme-set]");
+      if (!button) return;
+      event.stopPropagation();
+      applyTheme(button.dataset.themeSet);
+    })
+  );
+  systemDark.addEventListener("change", () => {
+    if (currentThemeChoice() === "system") applyTheme("system");
+  });
+}
+
 /* ============================================================== profile */
 
 function renderProfileMenus() {
@@ -1210,6 +1267,7 @@ function wire() {
 
   attachCountrySearch();
   wireProfileMenus();
+  wireTheme();
 
   // The brand in the header returns to the entry menu. History and
   // preferences are kept in state, so nothing is lost by going back.

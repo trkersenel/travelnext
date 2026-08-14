@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Waygo — discover where you should go next</title>
-<meta name="description" content="Tell us where you've been. Waygo learns what kind of traveller you are and helps you discover your next destination." />
+<title>waygo — discover where you should go next</title>
+<meta name="description" content="Tell us where you've been. waygo learns what kind of traveller you are and helps you discover your next destination." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,8 +14,8 @@
      tiles, no key. Desaturated in CSS to keep the neutral editorial tone. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<!-- Favicon: the Waygo mark, inline so it needs no extra request or file. -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23C4622D' stroke-linecap='round'%3E%3Ccircle cx='50' cy='50' r='12.5' fill='%23C4622D' stroke='none'/%3E%3Cpath d='M49.5 46 L48.5 14' stroke-width='9.5'/%3E%3Cpath d='M46 47 L11 22' stroke-width='9'/%3E%3Cpath d='M55 45.5 L70.5 16.5' stroke-width='8'/%3E%3Cpath d='M55 50 L86 50' stroke-width='8'/%3E%3Cpath d='M55.5 54.5 L80 67' stroke-width='8'/%3E%3Cpath d='M50 55 L49 86' stroke-width='8.5'/%3E%3Cpath d='M45.5 55.5 L25 88' stroke-width='8.5'/%3E%3Cpath d='M44.5 50 L17 50' stroke-width='8'/%3E%3C/g%3E%3C/svg%3E" />
+<!-- Favicon: the waygo mark, inline so it needs no extra request or file. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%236D4A8C' stroke-linecap='round'%3E%3Ccircle cx='50' cy='50' r='12.5' fill='%236D4A8C' stroke='none'/%3E%3Cpath d='M49.5 46 L48.5 14' stroke-width='9.5'/%3E%3Cpath d='M46 47 L11 22' stroke-width='9'/%3E%3Cpath d='M55 45.5 L70.5 16.5' stroke-width='8'/%3E%3Cpath d='M55 50 L86 50' stroke-width='8'/%3E%3Cpath d='M55.5 54.5 L80 67' stroke-width='8'/%3E%3Cpath d='M50 55 L49 86' stroke-width='8.5'/%3E%3Cpath d='M45.5 55.5 L25 88' stroke-width='8.5'/%3E%3Cpath d='M44.5 50 L17 50' stroke-width='8'/%3E%3C/g%3E%3C/svg%3E" />
 
 <link rel="stylesheet" href="/static/styles.css" />
 </head>
@@ -44,7 +44,7 @@
           <path d="M50 55 L49 86" stroke-width="8.5" />
           <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
           <path d="M44.5 50 L17 50" stroke-width="8" />
-        </svg> Waygo</div>
+        </svg> waygo</div>
 
         <h1 class="display">Discover where you should go next.</h1>
         <p class="lede">
@@ -189,7 +189,7 @@
   <div class="centred">
     <h1 class="display">Building your travel profile</h1>
     <p class="lede">
-      Waygo is analysing your destinations and preferences to understand
+      waygo is analysing your destinations and preferences to understand
       what places might fit you.
     </p>
 
@@ -260,7 +260,7 @@
           <path d="M50 55 L49 86" stroke-width="8.5" />
           <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
           <path d="M44.5 50 L17 50" stroke-width="8" />
-        </svg> Waygo</button>
+        </svg> waygo</button>
       <nav class="site-nav" id="nav">
         <button data-view="recommend" class="is-active">Recommendations</button>
         <button data-view="countries">My map</button>
@@ -286,6 +286,15 @@
             <div class="profile-divider"></div>
             <button class="profile-item" data-profile-signin>Sign in to save</button>
             <button class="profile-item" data-profile-reset>Start over</button>
+            <div class="profile-divider"></div>
+            <div class="profile-theme">
+              <span class="label">Appearance</span>
+              <div class="segmented segmented-sm" data-theme-switch>
+                <button data-theme-set="light">Light</button>
+                <button data-theme-set="dark">Dark</button>
+                <button data-theme-set="system">System</button>
+              </div>
+            </div>
           </div>
         </div>
       <div class="account" id="account"></div>
@@ -373,7 +382,7 @@
           <path d="M50 55 L49 86" stroke-width="8.5" />
           <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
           <path d="M44.5 50 L17 50" stroke-width="8" />
-        </svg> Waygo</button>
+        </svg> waygo</button>
       <nav class="site-nav" id="nav-trips">
         <button data-view="recommend">Recommendations</button>
         <button data-view="countries">My map</button>
@@ -399,6 +408,15 @@
             <div class="profile-divider"></div>
             <button class="profile-item" data-profile-signin>Sign in to save</button>
             <button class="profile-item" data-profile-reset>Start over</button>
+            <div class="profile-divider"></div>
+            <div class="profile-theme">
+              <span class="label">Appearance</span>
+              <div class="segmented segmented-sm" data-theme-switch>
+                <button data-theme-set="light">Light</button>
+                <button data-theme-set="dark">Dark</button>
+                <button data-theme-set="system">System</button>
+              </div>
+            </div>
           </div>
         </div>
       <div class="account" id="account-trips"></div>
@@ -446,7 +464,7 @@
           <path d="M50 55 L49 86" stroke-width="8.5" />
           <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
           <path d="M44.5 50 L17 50" stroke-width="8" />
-        </svg> Waygo</button>
+        </svg> waygo</button>
       <nav class="site-nav" id="nav-countries">
         <button data-view="recommend">Recommendations</button>
         <button data-view="countries" class="is-active">My map</button>
@@ -471,6 +489,15 @@
           <div class="profile-divider"></div>
           <button class="profile-item" data-profile-signin>Sign in to save</button>
           <button class="profile-item" data-profile-reset>Start over</button>
+          <div class="profile-divider"></div>
+            <div class="profile-theme">
+              <span class="label">Appearance</span>
+              <div class="segmented segmented-sm" data-theme-switch>
+                <button data-theme-set="light">Light</button>
+                <button data-theme-set="dark">Dark</button>
+                <button data-theme-set="system">System</button>
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -487,14 +514,6 @@
 
     <div class="country-stats" id="country-stats"></div>
 
-    <div class="map-frame world-frame">
-      <div id="world-map"></div>
-    </div>
-    <p class="map-note">
-      Boundaries from Natural Earth (public domain). Orange marks a country
-      you've visited.
-    </p>
-
     <div class="country-controls">
       <div class="search search-inline" id="country-search-wrap">
         <input type="text" id="country-search" placeholder="+ Add a country"
@@ -502,6 +521,14 @@
         <ul class="suggestions" id="country-suggestions" hidden></ul>
       </div>
     </div>
+
+    <div class="map-frame world-frame">
+      <div id="world-map"></div>
+    </div>
+    <p class="map-note">
+      Boundaries from Natural Earth (public domain). Orange marks a country
+      you've visited.
+    </p>
 
     <h2 class="sub">Your countries</h2>
     <div class="country-chips" id="country-chips"></div>

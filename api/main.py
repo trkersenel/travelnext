@@ -1,4 +1,4 @@
-"""FastAPI application for Waygo.
+"""FastAPI application for waygo.
 
     uvicorn api.main:app --reload
 
@@ -54,7 +54,7 @@ DATA_SOURCES = {
 }
 
 app = FastAPI(
-    title="Waygo API",
+    title="waygo API",
     version="0.1.0",
     description=(
         "An explainable travel recommendation engine built entirely on free, "

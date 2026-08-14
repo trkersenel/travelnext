@@ -21,6 +21,70 @@
   --border: #e4dcd0;
   --border-strong: #d5c9ba;
 
+  /* Brand mark. Deliberately a separate token from --terracotta: the logo is
+     purple, while terracotta stays the functional accent for match scores,
+     progress and the visited-country fill. A muted plum, not a neon violet —
+     the editorial rules still apply. */
+  --brand: #6d4a8c;
+
+  /* World map */
+  --map-ocean: #eef0f2;
+  --map-land: #dfd8cc;
+  --map-stroke: #ffffff;
+  --map-visited: #c4622d;
+
+  /* Primary button. Kept separate from --charcoal: that token is text, and it
+     inverts in dark mode, which turned solid buttons cream-on-white. */
+  --btn-bg: #2a1f1b;
+  --btn-fg: #ffffff;
+  --btn-bg-hover: #3d2e28;
+}
+
+/* ---------------------------------------------------------------- dark */
+/* Warm dark, not blue-black: the light theme is ivory and terracotta, so a
+   cold grey would read as a different product. Accents are lifted a step
+   because the light-theme values do not carry enough contrast on dark. */
+:root[data-theme="dark"] {
+  --ivory: #191512;
+  --surface: #221d19;
+  --charcoal: #f1eae1;
+  --muted: #a2958a;
+  --terracotta: #e07a42;
+  --terracotta-soft: rgba(224, 122, 66, 0.16);
+  --border: #302823;
+  --border-strong: #453a32;
+  --brand: #a98fd0;
+
+  --map-ocean: #14110f;
+  --map-land: #332c26;
+  --map-stroke: #191512;
+  --map-visited: #e07a42;
+
+  /* On dark, the high-contrast primary is a light button. */
+  --btn-bg: #f1eae1;
+  --btn-fg: #191512;
+  --btn-bg-hover: #ffffff;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-lift: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme="dark"] body {
+  /* Slightly thinner strokes read better as light-on-dark. */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Photographs are bright; knock them back a touch so they do not glare. */
+:root[data-theme="dark"] .card-photo img,
+:root[data-theme="dark"] .drawer-photo,
+:root[data-theme="dark"] .split-media img {
+  filter: brightness(0.88) saturate(0.95);
+}
+
+:root[data-theme="dark"] #map .leaflet-tile-pane {
+  filter: saturate(0.1) brightness(0.55) contrast(1.05) invert(0.9) hue-rotate(180deg);
+}
+
   /* --- typography ---------------------------------------------------- */
   /* Google Fonts are free and key-less. Every stack falls back to a system
      face, so the page stays readable with no network at all. */
@@ -91,7 +155,7 @@ button {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(245, 240, 232, 0.94);
+  background: color-mix(in srgb, var(--ivory) 94%, transparent);
   border-bottom: 1px solid var(--border);
   /* No blur: the spec explicitly rules out glassmorphism. */
 }
@@ -114,7 +178,7 @@ button {
 }
 
 .logo .mark {
-  color: var(--terracotta);
+  color: var(--brand);
   width: 1.05em;
   height: 1.05em;
   flex-shrink: 0;
@@ -132,8 +196,8 @@ button {
   cursor: pointer;
 }
 
-.logo-home:hover .mark { color: #a8501f; }
-.logo-home:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 4px; }
+.logo-home:hover .mark { filter: brightness(1.15); }
+.logo-home:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
 
 .site-nav {
   display: flex;
@@ -385,7 +449,7 @@ input:focus {
 .card-photo {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: #ece4d8;
+  background: var(--border);
   overflow: hidden;
 }
 
@@ -594,7 +658,7 @@ input:focus {
   height: 22px;
   border: 0;
   border-radius: var(--radius);
-  background: rgba(42, 31, 27, 0.72);
+  background: rgba(0, 0, 0, 0.72);
   color: #fff;
   font-size: 13px;
   line-height: 1;
@@ -643,7 +707,7 @@ input:focus {
 
 .skeleton .card-photo,
 .skeleton .bar {
-  background: linear-gradient(90deg, #ece4d8 25%, #f3ece2 50%, #ece4d8 75%);
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.3s infinite;
 }
@@ -805,11 +869,11 @@ input:focus {
 }
 
 .btn-dark {
-  background: var(--charcoal);
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
 }
 
-.btn-dark:hover { background: #3d2e28; }
+.btn-dark:hover { background: var(--btn-bg-hover); }
 
 .btn-dark:disabled {
   opacity: 0.35;
@@ -851,7 +915,7 @@ input:focus {
 
 .split-media {
   position: relative;
-  background: #e8e0d4;
+  background: var(--border);
   overflow: hidden;
   margin: 0;
 }
@@ -1035,7 +1099,7 @@ input:focus {
   object-fit: cover;
   border-radius: 2px;
   flex-shrink: 0;
-  background: #ece4d8;
+  background: var(--border);
 }
 
 .visited-list .v-name { font-weight: 500; }
@@ -1069,15 +1133,15 @@ input:focus {
 /* Neutral, editorial basemap: desaturate the OSM tiles rather than using a
    colourful commercial style. */
 #map .leaflet-tile-pane { filter: saturate(0.12) contrast(0.94) brightness(1.04); }
-#map .leaflet-container { background: #eee8de; font-family: var(--font-ui); }
+#map .leaflet-container { background: var(--map-land); font-family: var(--font-ui); }
 
 .pin {
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: var(--charcoal);
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(42, 31, 27, 0.25);
+  background: var(--terracotta);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
 .map-note { color: var(--muted); font-size: 12.5px; margin: 12px 0 0; }
@@ -1098,9 +1162,9 @@ input:focus {
 .chip-toggle:hover { border-color: var(--charcoal); }
 
 .chip-toggle.is-on {
-  background: var(--charcoal);
-  border-color: var(--charcoal);
-  color: #fff;
+  background: var(--btn-bg);
+  border-color: var(--btn-bg);
+  color: var(--btn-fg);
 }
 
 .chips-budget .chip-toggle {
@@ -1339,7 +1403,7 @@ input:focus {
   height: 62px;
   object-fit: cover;
   border-radius: 2px;
-  background: #ece4d8;
+  background: var(--border);
 }
 
 .timeline .t-name { font-size: 17px; font-weight: 500; }
@@ -1501,12 +1565,12 @@ input:focus {
 
 #world-map {
   height: 520px;
-  background: #eef0f2;   /* ocean */
+  background: var(--map-ocean);
 }
 
 /* The basemap is drawn from vectors, not tiles: no tile requests, no
    attribution clutter, and full control over the palette. */
-#world-map .leaflet-container { background: #eef0f2; font-family: var(--font-ui); }
+#world-map .leaflet-container { background: var(--map-ocean); font-family: var(--font-ui); }
 
 .country-stats {
   display: flex;
@@ -1563,4 +1627,22 @@ input:focus {
   .country-stats { gap: 22px; }
   .stat-value { font-size: 31px; }
   .profile-menu { right: -8px; }
+}
+
+/* --- appearance switch inside the profile menu ------------------------ */
+.profile-theme {
+  padding: 10px 12px 6px;
+  display: grid;
+  gap: 8px;
+}
+
+.segmented-sm button {
+  padding: 5px 9px;
+  font-size: 12px;
+  flex: 1;
+}
+
+.segmented-sm button.is-active {
+  background: var(--brand);
+  color: #fff;
 }
