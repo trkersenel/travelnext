@@ -1,4 +1,4 @@
-/* TravelNext — onboarding and recommendation flow.
+/* Waygo — onboarding and recommendation flow.
  *
  * A single-document flow: every screen exists in index.html and `show()`
  * swaps which one is visible. No framework and no build step, so the whole
@@ -881,6 +881,12 @@ function wire() {
   // Cross-page navigation
   document.querySelectorAll("#nav button, #nav-trips button").forEach((button) =>
     button.addEventListener("click", () => show(button.dataset.view))
+  );
+
+  // The brand in the header returns to the entry menu. History and
+  // preferences are kept in state, so nothing is lost by going back.
+  document.querySelectorAll("[data-home]").forEach((button) =>
+    button.addEventListener("click", () => show("login"))
   );
 
   $("drawer-close").addEventListener("click", closeDrawer);

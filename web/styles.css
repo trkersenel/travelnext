@@ -1,4 +1,4 @@
-/* TravelNext — editorial travel aesthetic.
+/* Waygo — editorial travel aesthetic.
  *
  * Design tokens taken from the Figma Make spec:
  *   warm ivory page, white card surfaces, charcoal text, warm-gray muted copy,
@@ -115,7 +115,25 @@ button {
 
 .logo .mark {
   color: var(--terracotta);
+  width: 1.05em;
+  height: 1.05em;
+  flex-shrink: 0;
+  align-self: center;
 }
+
+.logo-lg .mark { width: 1.15em; height: 1.15em; }
+
+/* The brand doubles as "back to the menu" on the app screens. */
+.logo-home {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.logo-home:hover .mark { color: #a8501f; }
+.logo-home:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 4px; }
 
 .site-nav {
   display: flex;

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TravelNext — discover where you should go next</title>
-<meta name="description" content="Tell us where you've been. TravelNext learns what kind of traveller you are and helps you discover your next destination." />
+<title>Waygo — discover where you should go next</title>
+<meta name="description" content="Tell us where you've been. Waygo learns what kind of traveller you are and helps you discover your next destination." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,6 +13,9 @@
 <!-- Leaflet for the travel-history map: free, open source, OpenStreetMap
      tiles, no key. Desaturated in CSS to keep the neutral editorial tone. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<!-- Favicon: the Waygo mark, inline so it needs no extra request or file. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23C4622D' stroke-linecap='round'%3E%3Ccircle cx='50' cy='50' r='12.5' fill='%23C4622D' stroke='none'/%3E%3Cpath d='M49.5 46 L48.5 14' stroke-width='9.5'/%3E%3Cpath d='M46 47 L11 22' stroke-width='9'/%3E%3Cpath d='M55 45.5 L70.5 16.5' stroke-width='8'/%3E%3Cpath d='M55 50 L86 50' stroke-width='8'/%3E%3Cpath d='M55.5 54.5 L80 67' stroke-width='8'/%3E%3Cpath d='M50 55 L49 86' stroke-width='8.5'/%3E%3Cpath d='M45.5 55.5 L25 88' stroke-width='8.5'/%3E%3Cpath d='M44.5 50 L17 50' stroke-width='8'/%3E%3C/g%3E%3C/svg%3E" />
 
 <link rel="stylesheet" href="/static/styles.css" />
 </head>
@@ -30,7 +33,18 @@
 
     <div class="split-body">
       <div class="split-inner">
-        <div class="logo logo-lg"><span class="mark">◈</span> TravelNext</div>
+        <div class="logo logo-lg"><svg class="mark" viewBox="0 0 100 100" fill="none" stroke="currentColor"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="50" cy="50" r="12.5" fill="currentColor" stroke="none" />
+          <path d="M49.5 46 L48.5 14" stroke-width="9.5" />
+          <path d="M46 47 L11 22" stroke-width="9" />
+          <path d="M55 45.5 L70.5 16.5" stroke-width="8" />
+          <path d="M55 50 L86 50" stroke-width="8" />
+          <path d="M55.5 54.5 L80 67" stroke-width="8" />
+          <path d="M50 55 L49 86" stroke-width="8.5" />
+          <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
+          <path d="M44.5 50 L17 50" stroke-width="8" />
+        </svg> Waygo</div>
 
         <h1 class="display">Discover where you should go next.</h1>
         <p class="lede">
@@ -42,7 +56,7 @@
           <a class="btn btn-outline" id="google-signin" href="/auth/login?next=/" hidden>
             <span class="g-mark" aria-hidden="true">G</span> Continue with Google
           </a>
-          <button class="btn btn-dark" data-auth="guest">Continue without an account</button>
+          <button class="btn btn-dark" data-auth="guest">Continue as a guest</button>
         </div>
 
         <p class="fineprint">
@@ -175,7 +189,7 @@
   <div class="centred">
     <h1 class="display">Building your travel profile</h1>
     <p class="lede">
-      TravelNext is analysing your destinations and preferences to understand
+      Waygo is analysing your destinations and preferences to understand
       what places might fit you.
     </p>
 
@@ -235,7 +249,18 @@
 <section class="screen" id="screen-recommend">
   <header class="site-header">
     <div class="shell">
-      <div class="logo"><span class="mark">◈</span> TravelNext</div>
+      <button class="logo logo-home" data-home title="Back to the menu"><svg class="mark" viewBox="0 0 100 100" fill="none" stroke="currentColor"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="50" cy="50" r="12.5" fill="currentColor" stroke="none" />
+          <path d="M49.5 46 L48.5 14" stroke-width="9.5" />
+          <path d="M46 47 L11 22" stroke-width="9" />
+          <path d="M55 45.5 L70.5 16.5" stroke-width="8" />
+          <path d="M55 50 L86 50" stroke-width="8" />
+          <path d="M55.5 54.5 L80 67" stroke-width="8" />
+          <path d="M50 55 L49 86" stroke-width="8.5" />
+          <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
+          <path d="M44.5 50 L17 50" stroke-width="8" />
+        </svg> Waygo</button>
       <nav class="site-nav" id="nav">
         <button data-view="recommend" class="is-active">Recommendations</button>
         <button data-view="trips">My trips</button>
@@ -314,7 +339,18 @@
 <section class="screen" id="screen-trips">
   <header class="site-header">
     <div class="shell">
-      <div class="logo"><span class="mark">◈</span> TravelNext</div>
+      <button class="logo logo-home" data-home title="Back to the menu"><svg class="mark" viewBox="0 0 100 100" fill="none" stroke="currentColor"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="50" cy="50" r="12.5" fill="currentColor" stroke="none" />
+          <path d="M49.5 46 L48.5 14" stroke-width="9.5" />
+          <path d="M46 47 L11 22" stroke-width="9" />
+          <path d="M55 45.5 L70.5 16.5" stroke-width="8" />
+          <path d="M55 50 L86 50" stroke-width="8" />
+          <path d="M55.5 54.5 L80 67" stroke-width="8" />
+          <path d="M50 55 L49 86" stroke-width="8.5" />
+          <path d="M45.5 55.5 L25 88" stroke-width="8.5" />
+          <path d="M44.5 50 L17 50" stroke-width="8" />
+        </svg> Waygo</button>
       <nav class="site-nav" id="nav-trips">
         <button data-view="recommend">Recommendations</button>
         <button data-view="trips" class="is-active">My trips</button>

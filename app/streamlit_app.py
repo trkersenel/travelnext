@@ -1,4 +1,4 @@
-"""TravelNext Streamlit interface.
+"""Waygo Streamlit interface.
 
     streamlit run app/streamlit_app.py
 
@@ -27,7 +27,7 @@ from src.config import load_config
 from src.preprocessing.features import PROFILE_CATEGORIES
 from src.service import RecommendationService
 
-st.set_page_config(page_title="TravelNext", page_icon="🧭", layout="wide")
+st.set_page_config(page_title="Waygo", page_icon="✳️", layout="wide")
 
 MONTH_NAMES = [
     "January", "February", "March", "April", "May", "June",
@@ -44,7 +44,7 @@ MODEL_LABELS = {
 }
 
 
-@st.cache_resource(show_spinner="Loading TravelNext models…")
+@st.cache_resource(show_spinner="Loading Waygo models…")
 def load_service() -> RecommendationService:
     """Build the service once per Streamlit session."""
     return RecommendationService()
@@ -173,7 +173,7 @@ def render_recommendation(item: Dict) -> None:
 
 
 def main() -> None:
-    st.title("🧭 TravelNext")
+    st.title("✳️ Waygo")
     st.caption("Where should I travel next? — an explainable travel recommender built on free, open data.")
 
     try:
