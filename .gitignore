@@ -29,3 +29,7 @@ models/*.joblib
 .DS_Store
 .vscode/
 .idea/
+
+# Local secrets (never commit)
+.env
+data/processed/travellers.db

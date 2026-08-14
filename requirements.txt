@@ -34,3 +34,9 @@ matplotlib>=3.11.1
 # --- tests ---
 pytest>=9.1.1
 httpx>=0.28.1            # FastAPI TestClient transport
+
+# --- optional: Google Sign-In ---
+# Only needed if GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are configured; the
+# app imports these lazily and runs anonymously without any credentials.
+authlib>=1.7.2
+itsdangerous>=2.2.0      # signs the session cookie

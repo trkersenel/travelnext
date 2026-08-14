@@ -379,14 +379,54 @@ one at mobile.
 
 **Photography comes from Wikimedia Commons, not a stock-photo API.** The
 design called for Unsplash, but that needs an account and an API key, which
-would break the project's central promise. The Wikipedia summary endpoint
-already returns a Commons image for each article, and the ingestion pipeline
-had those payloads cached — so every one of the 400 destinations has a real,
-correctly licensed photograph *of that destination*, obtained with zero
-additional network requests and no key.
+would break the project's central promise. Every one of the 400 destinations
+has a real, correctly licensed photograph *of that destination*, fetched
+key-free from the MediaWiki `pageimages` API at two widths — roughly 500px for
+list rows and search suggestions, and up to 1920px for the login hero, cards
+and the explanation drawer — and served through `srcset`.
+
+Two details that matter: the widths are *requested*, not derived by rewriting
+an existing thumbnail URL (that returns HTTP 400), and the `srcset` descriptors
+state each image's **true** width, because Wikimedia snaps a request to a
+standard bucket — asking for 400px yields 500px, and advertising the requested
+number would have the browser choose on false information.
 
 The Streamlit app remains for analysis work (attribute charts, climate curves,
 the Folium map); the web app is the product surface.
+
+### Optional: Google Sign-In
+
+The app runs anonymously by default — no account, no key, full engine. Sign-in
+is **opt-in** and exists only so a traveller's trips survive between sessions:
+
+```bash
+cp .env.example .env      # then fill in the two Google values
+set -a && source .env && set +a
+uvicorn api.main:app
+```
+
+`.env.example` walks through creating the OAuth client in Google Cloud. Google's
+OAuth endpoints cost nothing; what it costs you is a Google account and a Cloud
+project, which is precisely why the feature is optional and off by default.
+With the variables unset, `/auth/config` reports `enabled: false`, `/auth/login`
+returns 404, and the login screen offers only "Continue without an account".
+
+How it works, and what it deliberately does not do:
+
+* Authorization Code flow with OpenID Connect. Authlib fetches Google's JWKS
+  and verifies the ID token's signature, issuer, audience and nonce — no token
+  claim is trusted unverified.
+* `state` and `nonce` live in a signed, HttpOnly session cookie; a callback
+  with a forged `state` is rejected with 401 (there is a test for this).
+* Redirect targets are restricted to same-origin paths, so `?next=` cannot be
+  used as an open redirect (also tested).
+* **OAuth access and refresh tokens are never stored.** The app needs identity
+  and nothing else, so it keeps the subject id, email and display name and
+  discards the tokens. The requested scope is `openid email profile` — nothing
+  that would let it act on the user's behalf.
+* Signed-in trips and preferences live in a local SQLite file
+  (`data/processed/travellers.db`, gitignored). `DELETE /me` removes the
+  account and everything attached to it.
 
 ### Docker
 

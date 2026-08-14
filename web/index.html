@@ -39,10 +39,10 @@
         </p>
 
         <div class="auth">
-          <button class="btn btn-outline" data-auth="google">
+          <a class="btn btn-outline" id="google-signin" href="/auth/login?next=/" hidden>
             <span class="g-mark" aria-hidden="true">G</span> Continue with Google
-          </button>
-          <button class="btn btn-dark" data-auth="email">Continue with Email</button>
+          </a>
+          <button class="btn btn-dark" data-auth="guest">Continue without an account</button>
         </div>
 
         <p class="fineprint">
@@ -50,10 +50,7 @@
           <a href="#">Privacy Policy</a>.
         </p>
 
-        <p class="demo-note">
-          Demo build — these buttons start the flow locally and collect no
-          credentials of any kind.
-        </p>
+        <p class="demo-note" id="auth-note"></p>
       </div>
     </div>
   </div>
@@ -243,6 +240,7 @@
         <button data-view="recommend" class="is-active">Recommendations</button>
         <button data-view="trips">My trips</button>
       </nav>
+      <div class="account" id="account"></div>
     </div>
   </header>
 
@@ -321,6 +319,7 @@
         <button data-view="recommend">Recommendations</button>
         <button data-view="trips" class="is-active">My trips</button>
       </nav>
+      <div class="account" id="account-trips"></div>
     </div>
   </header>
 

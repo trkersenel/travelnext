@@ -770,8 +770,15 @@ input:focus {
 }
 
 /* --- buttons ---------------------------------------------------------- */
+/* The `hidden` attribute is implemented by the UA stylesheet as
+   `display: none`, which ANY explicit display rule outranks. `.btn-outline`
+   sets `display: inline-flex`, so the disabled Google button rendered anyway.
+   This has to win over every component rule. */
+[hidden] { display: none !important; }
+
 .btn {
   border: 1px solid transparent;
+  text-decoration: none;
   border-radius: var(--radius);
   padding: 13px 26px;
   font-size: 15px;
@@ -1354,4 +1361,47 @@ input:focus {
   .drawer { width: 100%; }
   #map { height: 320px; }
   .timeline img { width: 64px; height: 48px; }
+}
+
+
+/* --- account strip ---------------------------------------------------- */
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.account img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.account button {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.account button:hover { color: var(--terracotta); }
+
+.account .synced {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+
+.site-header .shell { gap: 20px; }
+
+@media (max-width: 640px) {
+  .account .who { display: none; }
 }

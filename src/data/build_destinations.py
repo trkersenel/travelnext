@@ -225,6 +225,14 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
     )
     summaries.to_parquet(interim / "summaries.parquet", index=False)
 
+    # Lead images at two widths. The summary endpoint also returns a picture,
+    # but only at ~330px, which is too soft for the hero and the cards.
+    LOGGER.info("[7b/7] Wikipedia lead images (400px + 1600px)")
+    images = wikipedia.fetch_page_images(
+        catalog["wiki_title"], cache_dir, user_agent=user_agent, timeout=timeout
+    )
+    images.to_parquet(interim / "page_images.parquet", index=False)
+
     # ----------------------------------------------------------- assemble
     frame = (
         catalog.merge(poi, on="destination_id", how="left")
@@ -232,12 +240,21 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
         .merge(climate_table, on="destination_id", how="left")
         .merge(cost, on="country_code", how="left")
         .merge(summaries, on="wiki_title", how="left")
+        .merge(images, on="wiki_title", how="left", suffixes=("_summary", ""))
     )
     frame["continent"] = frame["country_code"].map(regions.continent_of)
     frame["region"] = frame["country_code"].map(regions.region_of)
     frame["summary"] = frame["summary"].fillna("")
-    for column in ("image_url", "image_page"):
+    for column in ("image_url", "image_url_md", "image_url_hd", "image_page"):
         frame[column] = frame[column].fillna("") if column in frame.columns else ""
+    # Fall back to the lower-resolution summary image where pageimages had none.
+    if "image_url_summary" in frame.columns:
+        blank = frame["image_url"].str.len() == 0
+        frame.loc[blank, "image_url"] = frame.loc[blank, "image_url_summary"]
+        frame = frame.drop(columns=["image_url_summary"])
+    for bigger, smaller in (("image_url_md", "image_url"), ("image_url_hd", "image_url_md")):
+        blank = frame[bigger].str.len() == 0
+        frame.loc[blank, bigger] = frame.loc[blank, smaller]
     frame["poi_available"] = frame["poi_available"].fillna(False).astype(bool)
 
     poi_columns: List[str] = [f"poi_{name}" for name in overpass.CATEGORY_NAMES]

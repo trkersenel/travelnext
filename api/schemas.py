@@ -70,7 +70,12 @@ class RecommendationItem(BaseModel):
     rank: int
     cost_category: str
     popularity_percentile: float
-    image_url: str = Field(default="", description="Wikimedia Commons thumbnail (CC/PD licensed).")
+    image_url: str = Field(default="", description="400px Wikimedia Commons thumbnail (CC/PD licensed).")
+    image_url_hd: str = Field(default="", description="High-resolution version for hero and card use.")
+    image_url_md: str = Field(default="", description="Mid-size version for cards.")
+    image_width: int = 0
+    image_width_md: int = 0
+    image_width_hd: int = 0
     image_page: str = Field(default="", description="Wikipedia article the image came from.")
     reasons: List[str] = Field(default_factory=list)
     reason_details: List[ReasonDetail] = Field(default_factory=list)
@@ -106,7 +111,12 @@ class DestinationSummary(BaseModel):
     population: int
     cost_category: str
     popularity_percentile: float
-    image_url: str = Field(default="", description="Wikimedia Commons thumbnail (CC/PD licensed).")
+    image_url: str = Field(default="", description="400px Wikimedia Commons thumbnail (CC/PD licensed).")
+    image_url_hd: str = Field(default="", description="High-resolution version for hero and card use.")
+    image_url_md: str = Field(default="", description="Mid-size version for cards.")
+    image_width: int = 0
+    image_width_md: int = 0
+    image_width_hd: int = 0
 
 
 class DestinationListResponse(BaseModel):
@@ -128,6 +138,7 @@ class HealthResponse(BaseModel):
     n_interactions: int
     interactions_are_synthetic: bool
     ranker_available: bool
+    login_enabled: bool = False
     available_models: List[str]
     data_sources: Dict[str, str]
 
@@ -158,6 +169,7 @@ class VisitedItem(BaseModel):
     country: str
     country_code: str
     image_url: str = ""
+    image_url_hd: str = ""
     latitude: float
     longitude: float
 

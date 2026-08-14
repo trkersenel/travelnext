@@ -57,6 +57,11 @@ class Recommendation:
     cost_category: str
     popularity_percentile: float
     image_url: str = ""
+    image_url_md: str = ""
+    image_url_hd: str = ""
+    image_width: int = 0
+    image_width_md: int = 0
+    image_width_hd: int = 0
     image_page: str = ""
     reasons: List[Reason] = field(default_factory=list)
     attributes: Dict[str, float] = field(default_factory=dict)
@@ -76,6 +81,11 @@ class Recommendation:
             "cost_category": self.cost_category,
             "popularity_percentile": round(float(self.popularity_percentile), 4),
             "image_url": self.image_url,
+            "image_url_md": self.image_url_md,
+            "image_url_hd": self.image_url_hd,
+            "image_width": self.image_width,
+            "image_width_md": self.image_width_md,
+            "image_width_hd": self.image_width_hd,
             "image_page": self.image_page,
             "reasons": [reason.text for reason in self.reasons],
             "reason_details": [reason.as_dict() for reason in self.reasons],
@@ -317,6 +327,11 @@ class RecommendationService:
             cost_category=str(row["cost_category"]),
             popularity_percentile=float(row["popularity_score"]),
             image_url=str(row.get("image_url", "") or ""),
+            image_url_md=str(row.get("image_url_md", "") or ""),
+            image_url_hd=str(row.get("image_url_hd", "") or ""),
+            image_width_md=int(row.get("image_width_md", 0) or 0),
+            image_width=int(row.get("image_width", 0) or 0),
+            image_width_hd=int(row.get("image_width_hd", 0) or 0),
             image_page=str(row.get("image_page", "") or ""),
             reasons=self.explainer.explain(request, destination_id) if explain else [],
             attributes=attributes,
@@ -423,6 +438,7 @@ class RecommendationService:
                     "country": str(row["country"]),
                     "country_code": str(row["country_code"]),
                     "image_url": str(row.get("image_url", "") or ""),
+                    "image_url_hd": str(row.get("image_url_hd", "") or ""),
                     "latitude": float(row["latitude"]),
                     "longitude": float(row["longitude"]),
                 }
@@ -488,6 +504,7 @@ class RecommendationService:
             ],
             "summary": str(row.get("summary", ""))[:600],
             "image_url": str(row.get("image_url", "") or ""),
+            "image_url_hd": str(row.get("image_url_hd", "") or ""),
             "image_page": str(row.get("image_page", "") or ""),
             "wiki_title": str(row.get("wiki_title", "")),
             "similar_destinations": similar,

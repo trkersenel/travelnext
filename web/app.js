@@ -65,6 +65,8 @@ const state = {
   results: [],
   profile: null,
   map: null,
+  user: null,        // signed-in traveller, or null when anonymous
+  loginEnabled: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -86,6 +88,114 @@ const postJson = (path, payload) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+
+/* -------------------------------------------------------------- account */
+
+/** Persist the history server-side, but only for a signed-in traveller. */
+async function syncTrips() {
+  if (!state.user) return;
+  try {
+    await api("/me/trips", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history: state.history }),
+    });
+    markSynced();
+  } catch (error) {
+    // A failed sync must not break the session; the in-memory history stands.
+    console.warn("Could not save trips:", error.message);
+  }
+}
+
+async function syncPreferences() {
+  if (!state.user) return;
+  try {
+    await api("/me/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        interests: state.interests,
+        duration_days: state.duration,
+        budget: state.budget,
+      }),
+    });
+  } catch (error) {
+    console.warn("Could not save preferences:", error.message);
+  }
+}
+
+function markSynced() {
+  document.querySelectorAll(".account .synced").forEach((el) => {
+    el.textContent = "Saved";
+    clearTimeout(el._t);
+    el._t = setTimeout(() => (el.textContent = ""), 1800);
+  });
+}
+
+function renderAccount() {
+  const markup = state.user
+    ? `${state.user.picture ? `<img src="${state.user.picture}" alt="" />` : ""}
+       <span class="who">${state.user.name || state.user.email}</span>
+       <span class="synced"></span>
+       <button data-signout>Sign out</button>`
+    : state.loginEnabled
+      ? `<a href="/auth/login?next=/"><button>Sign in to save trips</button></a>`
+      : "";
+  ["account", "account-trips"].forEach((id) => {
+    const el = $(id);
+    if (el) el.innerHTML = markup;
+  });
+
+  document.querySelectorAll("[data-signout]").forEach((button) =>
+    button.addEventListener("click", async () => {
+      await api("/auth/logout", { method: "POST" }).catch(() => {});
+      state.user = null;
+      renderAccount();
+      show("login");
+    })
+  );
+}
+
+/** Load auth state; restore a signed-in traveller's stored history. */
+async function loadSession() {
+  let config;
+  try {
+    config = await api("/auth/config");
+  } catch (error) {
+    return false;
+  }
+  state.loginEnabled = Boolean(config.enabled);
+  state.user = config.user || null;
+
+  const button = $("google-signin");
+  const note = $("auth-note");
+  if (state.loginEnabled) {
+    button.hidden = false;
+    note.textContent =
+      "Signing in saves your trips so your profile is there next time.";
+  } else {
+    button.hidden = true;
+    note.textContent =
+      "Google Sign-In is not configured on this deployment, so trips are kept " +
+      "in this browser tab only. Everything else works exactly the same.";
+  }
+
+  if (state.user) {
+    const [trips, preferences] = await Promise.all([
+      api("/me/trips").catch(() => ({ history: [] })),
+      api("/me/preferences").catch(() => ({})),
+    ]);
+    if (trips.history && trips.history.length) {
+      state.history = trips.history;
+      state.origin = state.history[state.history.length - 1];
+    }
+    if (preferences.interests) state.interests = preferences.interests;
+    if (preferences.duration_days) state.duration = preferences.duration_days;
+    if (preferences.budget) state.budget = preferences.budget;
+  }
+  renderAccount();
+  return Boolean(state.user);
+}
 
 /* ---------------------------------------------------------------- router */
 
@@ -116,12 +226,50 @@ function flagEmoji(code) {
   );
 }
 
-function photo(destination, className) {
-  const url = destination && destination.image_url;
-  return url
-    ? `<img class="${className || ""}" src="${url}" alt="${destination.city}"
-         loading="lazy" onerror="this.style.visibility='hidden'" />`
-    : `<div class="${className || ""}" style="background:#ece4d8"></div>`;
+/**
+ * Render a destination photograph.
+ *
+ * `hd` picks the 1600px file and advertises both widths through srcset, so the
+ * browser downloads the large one only where it is actually large (hero, card,
+ * drawer). List rows and search suggestions stay on the 400px file — shipping
+ * 1600px into a twenty-row list would cost megabytes for no visible gain.
+ */
+// How wide the image is actually displayed, per context. Without this the
+// browser assumes a huge slot and downloads the 1920px file (~530KB) for a
+// 353px-wide card -- nine of those is 4.7MB for no visible benefit.
+const PHOTO_SIZES = {
+  hero: "(max-width: 860px) 100vw, 50vw",
+  card: "(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw",
+  drawer: "(max-width: 640px) 100vw, 480px",
+  thumb: "190px",
+  row: "80px",
+};
+
+function photo(destination, className, hd, context) {
+  const small = destination && destination.image_url;
+  const large = (destination && destination.image_url_hd) || small;
+  const medium = (destination && destination.image_url_md) || large;
+  if (!small && !large) {
+    return `<div class="${className || ""}" style="background:#ece4d8"></div>`;
+  }
+  const src = hd ? large : small;
+  // Descriptors must be the images' true widths. The API reports the width
+  // that was *requested* rather than the one delivered, so these come from
+  // the URL; advertising the wrong number makes the browser choose badly.
+  const candidates = [
+    [small, destination.image_width],
+    [destination.image_url_md, destination.image_width_md],
+    [large, destination.image_width_hd],
+  ].filter(([url, width]) => url && width);
+  const seen = new Set();
+  const srcset = candidates
+    .filter(([, width]) => !seen.has(width) && seen.add(width))
+    .map(([url, width]) => `${url} ${width}w`)
+    .join(", ");
+  return `<img class="${className || ""}" src="${src}"
+    ${srcset ? `srcset="${srcset}" sizes="${PHOTO_SIZES[context] || (hd ? PHOTO_SIZES.card : PHOTO_SIZES.row)}"` : ""}
+    alt="${destination.city}" loading="lazy"
+    onerror="this.style.visibility='hidden'" />`;
 }
 
 function durationLabel(days) {
@@ -211,6 +359,7 @@ function addCity(id) {
   state.origin = id; // most recent trip becomes the default starting point
   renderVisited();
   renderTimeline();
+  syncTrips();
 }
 
 function removeCity(id) {
@@ -218,6 +367,7 @@ function removeCity(id) {
   if (state.origin === id) state.origin = state.history[state.history.length - 1] || null;
   renderVisited();
   renderTimeline();
+  syncTrips();
 }
 
 function renderVisited() {
@@ -441,7 +591,7 @@ function renderProfile() {
   $("profile-visited").innerHTML = (profile.visited || [])
     .map(
       (d) => `<div class="trip">
-        ${photo(d)}
+        ${photo(d, "", true, "thumb")}
         <div class="trip-name">${d.city}<small>${d.country}</small></div>
       </div>`
     )
@@ -493,7 +643,7 @@ function renderCards() {
         .map(([name]) => name);
       return `<article class="card${index === 0 ? " is-lead" : ""}">
         <div class="card-photo">
-          ${photo(item)}
+          ${photo(item, '', true, 'card')}
           <span class="match-badge">${match}% match</span>
         </div>
         <div class="card-body">
@@ -564,7 +714,9 @@ async function openDrawer(destinationId) {
   if (!item) return;
 
   $("drawer-content").innerHTML = `
-    ${item.image_url ? `<img class="drawer-photo" src="${item.image_url}" alt="${item.city}" />` : ""}
+    ${item.image_url_hd || item.image_url
+      ? `<img class="drawer-photo" src="${item.image_url_hd || item.image_url}" alt="${item.city}" />`
+      : ""}
     <span class="label">${Math.round(item.score * 100)}% match</span>
     <h2>Why ${item.city}?</h2>
     <p class="d-country">${flagEmoji(item.country_code)} ${item.country}</p>
@@ -705,6 +857,7 @@ function wire() {
     if (budget) {
       state.budget = budget.dataset.budget;
       renderChoices();
+      syncPreferences();
     }
   });
 
@@ -772,7 +925,7 @@ async function main() {
       state.catalog.find((d) => d.image_url && d.continent === "Europe") ||
       state.catalog.find((d) => d.image_url);
     if (hero) {
-      $("login-photo").src = hero.image_url;
+      $("login-photo").src = hero.image_url_hd || hero.image_url;
       $("login-photo").alt = `${hero.city}, ${hero.country}`;
       $("login-credit").textContent = `${hero.city}, ${hero.country} · Wikimedia Commons`;
     }
@@ -784,8 +937,19 @@ async function main() {
     return;
   }
 
+  const signedIn = await loadSession();
+  renderChoices();
   renderVisited();
   renderRefine();
+  renderTimeline();
+
+  // A returning traveller with a saved history should not be asked to enter
+  // it again: build their profile and go straight to recommendations.
+  if (signedIn && state.history.length) {
+    state.profile = await postJson("/profile", { history: state.history }).catch(() => null);
+    await fetchRecommendations().catch(() => {});
+    show("recommend");
+  }
 }
 
 main();

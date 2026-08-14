@@ -20,6 +20,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from api.schemas import (
     DestinationListResponse,
@@ -30,8 +31,11 @@ from api.schemas import (
     RecommendRequest,
     RecommendResponse,
 )
+from api import auth_routes
+from src.auth import build_oauth_client, load_auth_settings
 from src.config import load_config
 from src.service import RecommendationService, get_service
+from src.storage import TravellerStore
 from src.utils.logging_utils import get_logger
 
 LOGGER = get_logger(__name__)
@@ -57,13 +61,39 @@ app = FastAPI(
 )
 
 # The Streamlit UI runs on a different port, so allow local cross-origin calls.
+# Credentials are NOT allowed cross-origin: the session cookie must only ever
+# be sent to this origin, which is what a wildcard origin would undermine.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+# ------------------------------------------------------------------- auth
+# Google Sign-In is optional. Without credentials the middleware and routes
+# still load (so /auth/config can answer "disabled"), but no login is offered
+# and the product works exactly as it does anonymously.
+AUTH_SETTINGS = load_auth_settings()
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=AUTH_SETTINGS.session_secret,
+    session_cookie="travelnext_session",
+    same_site="lax",          # survives the OAuth redirect back from Google
+    https_only=AUTH_SETTINGS.https_only,
+    max_age=60 * 60 * 24 * 30,
+)
+app.state.oauth = build_oauth_client(AUTH_SETTINGS)
+app.state.store = TravellerStore(load_config().path("data_processed") / "travellers.db")
+app.state.service_getter = get_service
+app.include_router(auth_routes.router)
+
+if not AUTH_SETTINGS.enabled:
+    LOGGER.info(
+        "Google Sign-In disabled (set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET "
+        "to enable it). The app runs anonymously."
+    )
 
 
 # ---------------------------------------------------------------- frontend
@@ -109,6 +139,7 @@ def health(service: RecommendationService = Depends(service_dependency)) -> Heal
         n_interactions=len(service.dataset.interactions),
         interactions_are_synthetic=True,
         ranker_available=service.ranker is not None,
+        login_enabled=app.state.oauth is not None,
         available_models=service.available_models(),
         data_sources=DATA_SOURCES,
     )
@@ -157,6 +188,11 @@ def list_destinations(
                 cost_category=str(row.cost_category),
                 popularity_percentile=round(float(row.popularity_score), 4),
                 image_url=str(getattr(row, "image_url", "") or ""),
+                image_url_hd=str(getattr(row, "image_url_hd", "") or ""),
+                image_url_md=str(getattr(row, "image_url_md", "") or ""),
+                image_width=int(getattr(row, "image_width", 0) or 0),
+                image_width_md=int(getattr(row, "image_width_md", 0) or 0),
+                image_width_hd=int(getattr(row, "image_width_hd", 0) or 0),
             )
             for row in page.itertuples(index=False)
         ],
