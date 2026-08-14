@@ -161,10 +161,13 @@ function computeBadges() {
 function burstConfetti(originX, originY, count = 26) {
   const layer = document.getElementById("confetti-layer");
   if (!layer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const colours = ["--terracotta", "--gold", "--blue", "--brand"];
+  // --terracotta and --brand are the same purple by design (see styles.css),
+  // so only one of them appears here -- otherwise purple would outnumber
+  // gold and blue two to one in every burst.
+  const colours = ["--terracotta", "--gold", "--blue"];
   for (let i = 0; i < count; i += 1) {
     const piece = document.createElement("div");
-    const colour = token(colours[i % colours.length], "#4fae2e");
+    const colour = token(colours[i % colours.length], "#7c4fe0");
     const angle = Math.random() * Math.PI * 2;
     const distance = 60 + Math.random() * 140;
     const dx = Math.cos(angle) * distance;

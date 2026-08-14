@@ -10,12 +10,12 @@
  *     exists for legibility over an arbitrary photograph, not decoration)
  *   - no glassmorphism / blur
  *   - every accent colour has a defined JOB, so colour carries meaning:
- *       green   = "go" / positive / completed (buttons, visited countries,
- *                 match bars, finished onboarding steps)
+ *       purple  = the brand colour AND the primary "go" accent (buttons,
+ *                 visited countries, match bars, finished onboarding steps)
+ *                 -- unified deliberately, so every button matches the logo
  *       gold    = reward / progress (XP pill, level bar, medals)
  *       blue    = a second informational accent (used sparingly)
  *       red     = destructive actions only (remove buttons)
- *       purple  = the brand mark, and nothing else
  */
 
 :root {
@@ -27,12 +27,17 @@
   --border: #ece5d6;
   --border-strong: #ddd3bf;
 
-  /* Functional accent: "go". Renamed from the old --terracotta, which no
-     longer describes the colour it holds; every usage site keeps the same
-     variable so this is a value change, not a rewrite. */
-  --terracotta: #4fae2e;
-  --terracotta-soft: rgba(79, 174, 46, 0.14);
-  --terracotta-shadow: #3c8a22;
+  /* Brand mark AND the functional "go" accent -- deliberately the same
+     colour, so every primary button, progress fill and visited-country
+     marker reads as "this app's colour" rather than a second, competing
+     accent. --terracotta is the historical variable name (it held an actual
+     terracotta, then a green, before this); every usage site keeps it, so
+     this is a value change, not a rewrite. --terracotta-shadow/-soft derive
+     from --brand via color-mix() so the two can never drift apart. */
+  --brand: #7c4fe0;
+  --terracotta: var(--brand);
+  --terracotta-soft: color-mix(in srgb, var(--brand) 14%, transparent);
+  --terracotta-shadow: color-mix(in srgb, var(--brand) 78%, black);
 
   /* Reward accent: XP, levels, medals. */
   --gold: #ffc200;
@@ -47,20 +52,18 @@
   --red: #ff4b4b;
   --red-shadow: #e63e3e;
 
-  /* Brand mark. Kept separate from the functional accent so the logo colour
-     and the "this means something happened" colour never compete. */
-  --brand: #7c4fe0;
-
   /* World map */
   --map-ocean: #eef4f0;
   --map-land: #e1dac9;
   --map-stroke: #ffffff;
   --map-visited: var(--terracotta);
 
-  /* Primary button face + its 3D "pressed" edge. */
+  /* Primary button face + its 3D "pressed" edge. White text on #7c4fe0
+     measures 5.18:1 contrast -- comfortably past the WCAG AA text minimum
+     of 4.5:1. */
   --btn-bg: var(--terracotta);
   --btn-fg: #ffffff;
-  --btn-bg-hover: #58bf35;
+  --btn-bg-hover: color-mix(in srgb, var(--brand) 92%, white);
   --btn-shadow: var(--terracotta-shadow);
 
   /* --- typography ------------------------------------------------------ */
@@ -82,7 +85,7 @@
 }
 
 /* ---------------------------------------------------------------- dark */
-/* Cool dark rather than the old warm charcoal: bright green/gold accents
+/* Cool dark rather than the old warm charcoal: bright purple/gold accents
    need a neutral backdrop to read clearly, and a brown-black would muddy
    them. Every accent is lifted a step for contrast on the darker surface. */
 :root[data-theme="dark"] {
@@ -93,9 +96,10 @@
   --border: #2a3134;
   --border-strong: #3a4247;
 
-  --terracotta: #58c132;
-  --terracotta-soft: rgba(88, 193, 50, 0.18);
-  --terracotta-shadow: #3f9924;
+  --brand: #b497f5;
+  --terracotta: var(--brand);
+  --terracotta-soft: color-mix(in srgb, var(--brand) 18%, transparent);
+  --terracotta-shadow: color-mix(in srgb, var(--brand) 78%, black);
 
   --gold: #ffd23d;
   --gold-shadow: #dba824;
@@ -107,16 +111,18 @@
   --red: #ff6b6b;
   --red-shadow: #e04b4b;
 
-  --brand: #b497f5;
-
   --map-ocean: #10161a;
   --map-land: #333b3f;
   --map-stroke: #14191c;
   --map-visited: var(--terracotta);
 
+  /* Unlike the light theme, white text on this lighter dark-mode purple only
+     measures 2.4:1 -- well under WCAG AA. Dark text measures 7.9:1, so the
+     button flips to dark-on-light here, the same pattern used everywhere
+     else a bright/pastel accent needs to hold a button face in dark mode. */
   --btn-bg: var(--terracotta);
-  --btn-fg: #0e1710;
-  --btn-bg-hover: #64d13e;
+  --btn-fg: #180f2e;
+  --btn-bg-hover: color-mix(in srgb, var(--brand) 92%, white);
   --btn-shadow: var(--terracotta-shadow);
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
