@@ -1,0 +1,27 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "travelnext-ui",
+      "runtimeExecutable": ".venv/bin/streamlit",
+      "runtimeArgs": [
+        "run",
+        "app/streamlit_app.py",
+        "--server.port", "8502",
+        "--server.headless", "true",
+        "--browser.gatherUsageStats", "false"
+      ],
+      "port": 8502
+    },
+    {
+      "name": "travelnext-api",
+      "runtimeExecutable": ".venv/bin/uvicorn",
+      "runtimeArgs": [
+        "api.main:app",
+        "--host", "127.0.0.1",
+        "--port", "8000"
+      ],
+      "port": 8000
+    }
+  ]
+}
