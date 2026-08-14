@@ -170,6 +170,27 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
         )
     poi.to_parquet(interim / "osm_pois.parquet", index=False)
 
+    # Beach AREA, not beach count. Counting features ranks Oslo (56 small urban
+    # and fjord beaches) above Barcelona (8 large ones); by area Barcelona has
+    # 14x more beach. Cheap: the query returns geometry for a handful of
+    # polygons per city.
+    if skip_overpass:
+        beaches = pd.DataFrame({"destination_id": catalog["destination_id"]})
+        beaches["beach_area_m2"] = 0.0
+        beaches["beach_area_available"] = False
+    else:
+        LOGGER.info("[4b/7] OpenStreetMap beach area")
+        beaches = overpass.fetch_beach_area_table(
+            catalog[["destination_id", "latitude", "longitude"]],
+            cache_dir,
+            endpoints=list(config.get("ingest.overpass.endpoints", [])),
+            radius_m=int(config.get("ingest.overpass.radius_m", 4000)),
+            retries=int(config.get("ingest.overpass.retries", 5)),
+            sleep_between_s=float(config.get("ingest.overpass.sleep_between_s", 3.0)),
+            user_agent=user_agent,
+        )
+    beaches.to_parquet(interim / "osm_beach_area.parquet", index=False)
+
     # --------------------------------------------------------- 4. climate
     LOGGER.info("[5/7] Open-Meteo climate normals")
     climate_table = climate.fetch_climate_table(
@@ -207,6 +228,7 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
     # ----------------------------------------------------------- assemble
     frame = (
         catalog.merge(poi, on="destination_id", how="left")
+        .merge(beaches, on="destination_id", how="left")
         .merge(climate_table, on="destination_id", how="left")
         .merge(cost, on="country_code", how="left")
         .merge(summaries, on="wiki_title", how="left")
@@ -218,6 +240,8 @@ def build(config: Config, *, limit: int | None = None, skip_overpass: bool = Fal
 
     poi_columns: List[str] = [f"poi_{name}" for name in overpass.CATEGORY_NAMES]
     frame[poi_columns] = frame[poi_columns].fillna(0).astype("int64")
+    frame["beach_area_m2"] = frame["beach_area_m2"].fillna(0.0)
+    frame["beach_area_available"] = frame["beach_area_available"].fillna(False).astype(bool)
 
     output = config.path("data_processed") / "destinations_raw.parquet"
     frame.to_parquet(output, index=False)

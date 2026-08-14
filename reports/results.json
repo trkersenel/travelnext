@@ -18,156 +18,156 @@
     {
       "model": "collaborative",
       "users": 2787,
-      "precision@5": 0.09809831359885181,
-      "recall@5": 0.24524578399712954,
-      "f1@5": 0.14014044799835976,
-      "map@5": 0.15921839492883627,
-      "mrr@5": 0.28084559263246023,
-      "ndcg@5": 0.21285547365551144,
-      "precision@10": 0.06318622174381056,
-      "recall@10": 0.3159311087190527,
-      "f1@10": 0.10531036957301758,
-      "map@10": 0.1720493675283772,
-      "mrr@10": 0.29280303677504965,
-      "ndcg@10": 0.24085438317052785,
-      "precision@20": 0.03826695371367061,
-      "recall@20": 0.38266953713670615,
-      "f1@20": 0.06957627947940112,
-      "map@20": 0.17848560406174624,
-      "mrr@20": 0.29832957334777765,
-      "ndcg@20": 0.26149996923447316
+      "precision@5": 0.09759598134194475,
+      "recall@5": 0.24398995335486187,
+      "f1@5": 0.13942283048849252,
+      "map@5": 0.1583542638440378,
+      "mrr@5": 0.2798349479727305,
+      "ndcg@5": 0.21180214586193907,
+      "precision@10": 0.06311445999282382,
+      "recall@10": 0.3155722999641191,
+      "f1@10": 0.1051907666547064,
+      "map@10": 0.17121100802478628,
+      "mrr@10": 0.29219334666051566,
+      "ndcg@10": 0.240147861549032,
+      "precision@20": 0.038302834589163975,
+      "recall@20": 0.38302834589163975,
+      "f1@20": 0.06964151743484359,
+      "map@20": 0.1777974947555616,
+      "mrr@20": 0.29769056041384384,
+      "ndcg@20": 0.2610431980183283
     },
     {
       "model": "hybrid",
       "users": 2787,
-      "precision@5": 0.09809831359885181,
-      "recall@5": 0.24524578399712954,
-      "f1@5": 0.14014044799835976,
-      "map@5": 0.15921839492883627,
-      "mrr@5": 0.28084559263246023,
-      "ndcg@5": 0.21285547365551144,
-      "precision@10": 0.06318622174381056,
-      "recall@10": 0.3159311087190527,
-      "f1@10": 0.10531036957301758,
-      "map@10": 0.1720493675283772,
-      "mrr@10": 0.29280303677504965,
-      "ndcg@10": 0.24085438317052785,
-      "precision@20": 0.03826695371367061,
-      "recall@20": 0.38266953713670615,
-      "f1@20": 0.06957627947940112,
-      "map@20": 0.17848560406174624,
-      "mrr@20": 0.29832957334777765,
-      "ndcg@20": 0.26149996923447316
+      "precision@5": 0.09759598134194475,
+      "recall@5": 0.24398995335486187,
+      "f1@5": 0.13942283048849252,
+      "map@5": 0.1583542638440378,
+      "mrr@5": 0.2798349479727305,
+      "ndcg@5": 0.21180214586193907,
+      "precision@10": 0.06311445999282382,
+      "recall@10": 0.3155722999641191,
+      "f1@10": 0.1051907666547064,
+      "map@10": 0.17121100802478628,
+      "mrr@10": 0.29219334666051566,
+      "ndcg@10": 0.240147861549032,
+      "precision@20": 0.038302834589163975,
+      "recall@20": 0.38302834589163975,
+      "f1@20": 0.06964151743484359,
+      "map@20": 0.1777974947555616,
+      "mrr@20": 0.29769056041384384,
+      "ndcg@20": 0.2610431980183283
     },
     {
       "model": "learning_to_rank",
       "users": 2787,
-      "precision@5": 0.08855400071761751,
-      "recall@5": 0.22138500179404377,
-      "f1@5": 0.12650571531088217,
-      "map@5": 0.13999820595622534,
-      "mrr@5": 0.24933022365745725,
-      "ndcg@5": 0.18929456177596418,
-      "precision@10": 0.05880875493362037,
-      "recall@10": 0.2940437746681019,
-      "f1@10": 0.098014591556034,
-      "map@10": 0.15274445982196252,
-      "mrr@10": 0.26281858515443013,
-      "ndcg@10": 0.21816480312839326,
-      "precision@20": 0.03699318263365626,
-      "recall@20": 0.36993182633656263,
-      "f1@20": 0.06726033206119321,
-      "map@20": 0.15997203813237398,
-      "mrr@20": 0.2696147340206833,
-      "ndcg@20": 0.241764182400372
+      "precision@5": 0.0917832795120201,
+      "recall@5": 0.22945819878005022,
+      "f1@5": 0.1311189707314573,
+      "map@5": 0.14550891041741418,
+      "mrr@5": 0.2557828011003468,
+      "ndcg@5": 0.19585342798780683,
+      "precision@10": 0.0617151058485827,
+      "recall@10": 0.30857552924291354,
+      "f1@10": 0.10285850974763787,
+      "map@10": 0.15921618797022458,
+      "mrr@10": 0.27089163975601005,
+      "ndcg@10": 0.2273127092004632,
+      "precision@20": 0.0378005023322569,
+      "recall@20": 0.3780050233225691,
+      "f1@20": 0.06872818605864893,
+      "map@20": 0.16584056742044376,
+      "mrr@20": 0.2769932809118641,
+      "ndcg@20": 0.2488673515841155
     },
     {
       "model": "next_destination",
       "users": 2787,
-      "precision@5": 0.03860782203085755,
-      "recall@5": 0.09651955507714388,
-      "f1@5": 0.05515403147265366,
-      "map@5": 0.05359107762229399,
-      "mrr@5": 0.09727903360842005,
-      "ndcg@5": 0.0763546861210974,
-      "precision@10": 0.02978112665949049,
-      "recall@10": 0.14890563329745246,
-      "f1@10": 0.049635211099150825,
-      "map@10": 0.06217344131768244,
-      "mrr@10": 0.1076204145095426,
-      "ndcg@10": 0.0969887681128134,
-      "precision@20": 0.022371725870111228,
-      "recall@20": 0.2237172587011123,
-      "f1@20": 0.04067586521838405,
-      "map@20": 0.06871895836699948,
-      "mrr@20": 0.11497357436751805,
-      "ndcg@20": 0.12005676306564252
+      "precision@5": 0.04772156440617151,
+      "recall@5": 0.11930391101542878,
+      "f1@5": 0.06817366343738789,
+      "map@5": 0.06683411075230236,
+      "mrr@5": 0.12102619303911014,
+      "ndcg@5": 0.0948496259473713,
+      "precision@10": 0.03792608539648368,
+      "recall@10": 0.18963042698241836,
+      "f1@10": 0.0632101423274728,
+      "map@10": 0.078243090083779,
+      "mrr@10": 0.13516097983266984,
+      "ndcg@10": 0.12255831014035291,
+      "precision@20": 0.02800502332256907,
+      "recall@20": 0.2800502332256907,
+      "f1@20": 0.05091822422285285,
+      "map@20": 0.0866311245658608,
+      "mrr@20": 0.14326358354775343,
+      "ndcg@20": 0.15050685784052797
     },
     {
       "model": "popularity",
       "users": 2787,
-      "precision@5": 0.03157517043415859,
-      "recall@5": 0.07893792608539649,
-      "f1@5": 0.04510738633451228,
-      "map@5": 0.03470876689391221,
-      "mrr@5": 0.06472909939002511,
-      "ndcg@5": 0.054863979535426856,
-      "precision@10": 0.02870470039468963,
-      "recall@10": 0.14352350197344815,
-      "f1@10": 0.04784116732448272,
-      "map@10": 0.04493901675010394,
-      "mrr@10": 0.08051284022758727,
-      "ndcg@10": 0.0810116765060774,
-      "precision@20": 0.026139217796914242,
-      "recall@20": 0.26139217796914244,
-      "f1@20": 0.047525850539844074,
-      "map@20": 0.054477694147042996,
-      "mrr@20": 0.09369713716909508,
-      "ndcg@20": 0.11737447865550876
+      "precision@5": 0.031001076426264804,
+      "recall@5": 0.077502691065662,
+      "f1@5": 0.04428725203752115,
+      "map@5": 0.03401806004066499,
+      "mrr@5": 0.0632520033488817,
+      "ndcg@5": 0.053771393548884376,
+      "precision@10": 0.02841765339074273,
+      "recall@10": 0.14208826695371368,
+      "f1@10": 0.0473627556512379,
+      "map@10": 0.04423036945911004,
+      "mrr@10": 0.0791194662292617,
+      "ndcg@10": 0.07993386201219158,
+      "precision@20": 0.025995694294940804,
+      "recall@20": 0.25995694294940797,
+      "f1@20": 0.04726489871807418,
+      "map@20": 0.05380681835498592,
+      "mrr@20": 0.09235994188663092,
+      "ndcg@20": 0.11634671199156317
     },
     {
       "model": "content",
       "users": 2787,
-      "precision@5": 0.021385001794043776,
-      "recall@5": 0.05346250448510944,
-      "f1@5": 0.030550002562919683,
-      "map@5": 0.027182753259179522,
-      "mrr@5": 0.05038272933859587,
-      "ndcg@5": 0.04031338542752953,
-      "precision@10": 0.017043415859346968,
-      "recall@10": 0.08521707929673485,
-      "f1@10": 0.028405693098911614,
-      "map@10": 0.031670212038888035,
-      "mrr@10": 0.05759606677260068,
-      "ndcg@10": 0.05266906544086387,
-      "precision@20": 0.013616792249730895,
-      "recall@20": 0.13616792249730894,
-      "f1@20": 0.024757804090419805,
-      "map@20": 0.035686382347148944,
-      "mrr@20": 0.06341767944497502,
-      "ndcg@20": 0.06835432667692518
+      "precision@5": 0.031216361679224973,
+      "recall@5": 0.07804090419806244,
+      "f1@5": 0.044594802398892824,
+      "map@5": 0.04010285850974764,
+      "mrr@5": 0.07408204760196148,
+      "ndcg@5": 0.059205699361881345,
+      "precision@10": 0.025224255471833518,
+      "recall@10": 0.12612127735916756,
+      "f1@10": 0.042040425786389196,
+      "map@10": 0.04741394285258656,
+      "mrr@10": 0.08509847306940957,
+      "ndcg@10": 0.07826214360592547,
+      "precision@20": 0.019052744886975243,
+      "recall@20": 0.19052744886975242,
+      "f1@20": 0.03464135433995498,
+      "map@20": 0.05296815733913948,
+      "mrr@20": 0.09163701343364551,
+      "ndcg@20": 0.09814088212538484
     },
     {
       "model": "matrix_factorization",
       "users": 2787,
-      "precision@5": 0.011194833153928958,
-      "recall@5": 0.02798708288482239,
-      "f1@5": 0.01599261879132708,
-      "map@5": 0.014561655304389425,
-      "mrr@5": 0.0278794402583423,
-      "ndcg@5": 0.021616028205486228,
-      "precision@10": 0.009041980624327234,
-      "recall@10": 0.04520990312163617,
-      "f1@10": 0.015069967707212058,
-      "map@10": 0.01697841736862189,
-      "mrr@10": 0.031778353010861085,
-      "ndcg@10": 0.02830482359502587,
-      "precision@20": 0.0075888051668460705,
-      "recall@20": 0.07588805166846072,
-      "f1@20": 0.013797827576083764,
-      "map@20": 0.019263182864062,
-      "mrr@20": 0.035529621729037196,
-      "ndcg@20": 0.03773954595283589
+      "precision@5": 0.011051309651955507,
+      "recall@5": 0.027628274129888768,
+      "f1@5": 0.0157875852170793,
+      "map@5": 0.014818801578758522,
+      "mrr@5": 0.02842961368257385,
+      "ndcg@5": 0.021716660631408258,
+      "precision@10": 0.009006099748833872,
+      "recall@10": 0.04503049874416936,
+      "f1@10": 0.015010166248056456,
+      "map@10": 0.0173113833501347,
+      "mrr@10": 0.03278401421566115,
+      "ndcg@10": 0.028636778834021583,
+      "precision@20": 0.007750269106566201,
+      "recall@20": 0.077502691065662,
+      "f1@20": 0.01409139837557491,
+      "map@20": 0.019802712303324664,
+      "mrr@20": 0.036831994151651094,
+      "ndcg@20": 0.038710686122378886
     }
   ],
   "beyond_accuracy": [
@@ -176,94 +176,94 @@
       "k": 10,
       "catalog_coverage": 0.045,
       "n_unique_recommended": 18,
-      "gini": 0.9701176892716183,
-      "mean_popularity_percentile": 0.37244357732328665,
-      "share_from_top_decile": 0.08848223896663078,
-      "novelty": 2.2773377207896366,
-      "intra_list_diversity": 0.18490919938720599,
-      "geographic_spread_km": 6999.11150302033,
-      "country_entropy": 3.0214334720368594
+      "gini": 0.9701171510584858,
+      "mean_popularity_percentile": 0.3725272694653749,
+      "share_from_top_decile": 0.08844635809113742,
+      "novelty": 2.2770473003933858,
+      "intra_list_diversity": 0.8210895333045984,
+      "geographic_spread_km": 6999.402174141081,
+      "country_entropy": 3.020849881706523
     },
     {
       "model": "content",
       "k": 10,
-      "catalog_coverage": 0.96,
-      "n_unique_recommended": 384,
-      "gini": 0.6715789379260855,
-      "mean_popularity_percentile": 0.5429412002152852,
-      "share_from_top_decile": 0.1054897739504844,
-      "novelty": 1.2496739380539108,
-      "intra_list_diversity": 0.02626096501615284,
-      "geographic_spread_km": 4106.812636752794,
-      "country_entropy": 1.4860963819434911
+      "catalog_coverage": 0.995,
+      "n_unique_recommended": 398,
+      "gini": 0.6135114818801579,
+      "mean_popularity_percentile": 0.508994124506638,
+      "share_from_top_decile": 0.07226408324363115,
+      "novelty": 1.434660457787227,
+      "intra_list_diversity": 0.6244740885818554,
+      "geographic_spread_km": 3979.208382556922,
+      "country_entropy": 1.6103751011142888
     },
     {
       "model": "collaborative",
       "k": 10,
-      "catalog_coverage": 0.7875,
-      "n_unique_recommended": 315,
-      "gini": 0.8693995335486187,
-      "mean_popularity_percentile": 0.3938505561535701,
-      "share_from_top_decile": 0.03821313240043057,
-      "novelty": 2.0461716661452654,
-      "intra_list_diversity": 0.11589912980595572,
-      "geographic_spread_km": 6748.770689342083,
-      "country_entropy": 2.513877991996885
+      "catalog_coverage": 0.7725,
+      "n_unique_recommended": 309,
+      "gini": 0.8698338715464657,
+      "mean_popularity_percentile": 0.3945432364549694,
+      "share_from_top_decile": 0.03853606027987083,
+      "novelty": 2.043276954880508,
+      "intra_list_diversity": 0.7780878875698688,
+      "geographic_spread_km": 6753.473737991221,
+      "country_entropy": 2.5076215317590056
     },
     {
       "model": "matrix_factorization",
       "k": 10,
-      "catalog_coverage": 0.95,
-      "n_unique_recommended": 380,
-      "gini": 0.28216899892357383,
-      "mean_popularity_percentile": 0.47674439361320414,
-      "share_from_top_decile": 0.07900968783638321,
-      "novelty": 1.4878337384449036,
-      "intra_list_diversity": 0.03303208479496604,
-      "geographic_spread_km": 5479.91188034377,
-      "country_entropy": 2.4865199261401973
+      "catalog_coverage": 0.9575,
+      "n_unique_recommended": 383,
+      "gini": 0.2742380696088984,
+      "mean_popularity_percentile": 0.4736062522425547,
+      "share_from_top_decile": 0.07538571941155364,
+      "novelty": 1.497703928101433,
+      "intra_list_diversity": 0.9180933998498766,
+      "geographic_spread_km": 5501.642053328843,
+      "country_entropy": 2.508765940763805
     },
     {
       "model": "hybrid",
       "k": 10,
-      "catalog_coverage": 0.7875,
-      "n_unique_recommended": 315,
-      "gini": 0.8693995335486187,
-      "mean_popularity_percentile": 0.3938505561535701,
-      "share_from_top_decile": 0.03821313240043057,
-      "novelty": 2.0461716661452654,
-      "intra_list_diversity": 0.11589912980595572,
-      "geographic_spread_km": 6748.770689342083,
-      "country_entropy": 2.513877991996885
+      "catalog_coverage": 0.7725,
+      "n_unique_recommended": 309,
+      "gini": 0.8698338715464657,
+      "mean_popularity_percentile": 0.3945432364549694,
+      "share_from_top_decile": 0.03853606027987083,
+      "novelty": 2.043276954880508,
+      "intra_list_diversity": 0.7780878875698688,
+      "geographic_spread_km": 6753.473737991221,
+      "country_entropy": 2.5076215317590056
     },
     {
       "model": "next_destination",
       "k": 10,
-      "catalog_coverage": 0.9725,
-      "n_unique_recommended": 389,
-      "gini": 0.5700217079296734,
-      "mean_popularity_percentile": 0.6244376121277359,
-      "share_from_top_decile": 0.17161822748475064,
-      "novelty": 1.0311527345681464,
-      "intra_list_diversity": 0.034001155880772745,
-      "geographic_spread_km": 1954.6376427573273,
-      "country_entropy": 1.6296655124185488
+      "catalog_coverage": 0.975,
+      "n_unique_recommended": 390,
+      "gini": 0.5871338356655902,
+      "mean_popularity_percentile": 0.5767647111589523,
+      "share_from_top_decile": 0.14797273053462504,
+      "novelty": 1.2350427164184725,
+      "intra_list_diversity": 0.7192987472378037,
+      "geographic_spread_km": 2102.2980618171364,
+      "country_entropy": 1.6821576441698052
     },
     {
       "model": "learning_to_rank",
       "k": 10,
-      "catalog_coverage": 0.9575,
-      "n_unique_recommended": 383,
-      "gini": 0.7133801578758523,
-      "mean_popularity_percentile": 0.48858867061356304,
-      "share_from_top_decile": 0.11930391101542878,
-      "novelty": 1.651238620409804,
-      "intra_list_diversity": 0.10816901749356067,
-      "geographic_spread_km": 6639.972902527196,
-      "country_entropy": 2.4679527030549617
+      "catalog_coverage": 0.9525,
+      "n_unique_recommended": 381,
+      "gini": 0.7408406889128096,
+      "mean_popularity_percentile": 0.444984212414783,
+      "share_from_top_decile": 0.09020452099031216,
+      "novelty": 1.818619835423935,
+      "intra_list_diversity": 0.8508706463103078,
+      "geographic_spread_km": 6537.223322648068,
+      "country_entropy": 2.433140792983676
     }
   ],
-  "candidate_recall_at_test": 0.877,
+  "candidate_recall_at_test": 0.878,
   "hybrid_weights": {
     "content": 0.0,
     "collaborative": 1.0,
@@ -273,183 +273,176 @@
   "feature_importance": [
     {
       "feature": "collaborative_score",
-      "gain": 446680.93812942505,
-      "gain_share": 0.6469304412418736
+      "gain": 392173.4697380066,
+      "gain_share": 0.682322966242285
     },
     {
       "feature": "max_cf_similarity",
-      "gain": 71978.40417098999,
-      "gain_share": 0.10424671570993328
+      "gain": 59722.36629486084,
+      "gain_share": 0.10390795213286841
     },
     {
       "feature": "distance_km_log",
-      "gain": 26711.321685791016,
-      "gain_share": 0.03868615302167976
+      "gain": 24435.954021453857,
+      "gain_share": 0.042514891795248436
     },
     {
       "feature": "history_length",
-      "gain": 26425.515948295593,
-      "gain_share": 0.03827221901177626
+      "gain": 19402.744472503662,
+      "gain_share": 0.033757862740088296
     },
     {
       "feature": "popularity_score",
-      "gain": 25845.228046417236,
-      "gain_share": 0.03743178487554116
+      "gain": 19283.394332885742,
+      "gain_share": 0.03355021141339367
     },
     {
       "feature": "profile_cosine",
-      "gain": 19038.949635505676,
-      "gain_share": 0.027574214695749343
-    },
-    {
-      "feature": "from_geographic",
-      "gain": 14189.939282417297,
-      "gain_share": 0.020551366529345284
+      "gain": 18139.483169555664,
+      "gain_share": 0.03155997770736947
     },
     {
       "feature": "from_collaborative",
-      "gain": 9971.941591262817,
-      "gain_share": 0.014442417446084604
+      "gain": 9484.613418579102,
+      "gain_share": 0.016501803566033254
     },
     {
-      "feature": "content_score",
-      "gain": 8451.11609172821,
-      "gain_share": 0.0122397975725212
-    },
-    {
-      "feature": "from_content",
-      "gain": 6628.131151199341,
-      "gain_share": 0.009599558530997743
+      "feature": "from_geographic",
+      "gain": 8197.703094482422,
+      "gain_share": 0.014262772786587417
     },
     {
       "feature": "from_popularity",
-      "gain": 6413.877115249634,
-      "gain_share": 0.009289253241062502
+      "gain": 4997.7047119140625,
+      "gain_share": 0.008695255968524203
     },
     {
       "feature": "popularity_percentile",
-      "gain": 5906.341767311096,
-      "gain_share": 0.008554187025873822
+      "gain": 4232.701026916504,
+      "gain_share": 0.007364264395120413
     },
     {
       "feature": "proximity",
-      "gain": 4914.7523765563965,
-      "gain_share": 0.007118062697895832
+      "gain": 3991.2335243225098,
+      "gain_share": 0.0069441471884895845
     },
     {
-      "feature": "mean_content_similarity",
-      "gain": 3688.8940649032593,
-      "gain_share": 0.005342645412844822
+      "feature": "content_score",
+      "gain": 2972.629913330078,
+      "gain_share": 0.005171929812995604
     },
     {
-      "feature": "context_score",
-      "gain": 2981.3157062530518,
-      "gain_share": 0.0043178558131548835
+      "feature": "from_content",
+      "gain": 2688.300796508789,
+      "gain_share": 0.004677239831778473
     },
     {
       "feature": "cost_percentile",
-      "gain": 2623.652943611145,
-      "gain_share": 0.003799850881445276
+      "gain": 1420.4980773925781,
+      "gain_share": 0.002471453416661436
+    },
+    {
+      "feature": "mean_content_similarity",
+      "gain": 1253.3881149291992,
+      "gain_share": 0.002180707167679262
+    },
+    {
+      "feature": "context_score",
+      "gain": 880.4844169616699,
+      "gain_share": 0.0015319107116367305
     },
     {
       "feature": "max_content_similarity",
-      "gain": 2494.0898871421814,
-      "gain_share": 0.003612203999442386
-    },
-    {
-      "feature": "seasonality",
-      "gain": 1304.683976650238,
-      "gain_share": 0.0018895809259964027
-    },
-    {
-      "feature": "population_log",
-      "gain": 1197.0922322273254,
-      "gain_share": 0.0017337552151769945
-    },
-    {
-      "feature": "budget_fit",
-      "gain": 1085.1443796157837,
-      "gain_share": 0.0015716205290868515
-    },
-    {
-      "feature": "season_fit",
-      "gain": 1041.9254221916199,
-      "gain_share": 0.00150902627710575
-    },
-    {
-      "feature": "trip_duration_days",
-      "gain": 293.9037113189697,
-      "gain_share": 0.0004256623496011239
+      "gain": 725.6133003234863,
+      "gain_share": 0.0012624582171566344
     },
     {
       "feature": "same_continent",
-      "gain": 238.70850563049316,
-      "gain_share": 0.00034572283187732096
+      "gain": 241.9241943359375,
+      "gain_share": 0.0004209117817055498
     },
     {
-      "feature": "month_sin",
-      "gain": 139.84994220733643,
-      "gain_share": 0.00020254543477659712
+      "feature": "seasonality",
+      "gain": 165.9149932861328,
+      "gain_share": 0.0002886671819965074
     },
     {
-      "feature": "month_cos",
-      "gain": 129.23131942749023,
-      "gain_share": 0.0001871664254346841
+      "feature": "population_log",
+      "gain": 106.7125015258789,
+      "gain_share": 0.00018566373351291388
     },
     {
-      "feature": "same_country",
-      "gain": 73.5999002456665,
-      "gain_share": 0.00010659513732706192
+      "feature": "budget_fit",
+      "gain": 81.45709991455078,
+      "gain_share": 0.00014172312592262038
     },
     {
       "feature": "same_region",
-      "gain": 13.531100273132324,
-      "gain_share": 1.9597166395421976e-05
+      "gain": 63.67620086669922,
+      "gain_share": 0.00011078703075817759
+    },
+    {
+      "feature": "same_country",
+      "gain": 50.230201721191406,
+      "gain_share": 8.739301069051928e-05
+    },
+    {
+      "feature": "trip_duration_days",
+      "gain": 50.032501220703125,
+      "gain_share": 8.704904149747093e-05
+    },
+    {
+      "feature": "season_fit",
+      "gain": 0.0,
+      "gain_share": 0.0
+    },
+    {
+      "feature": "month_sin",
+      "gain": 0.0,
+      "gain_share": 0.0
+    },
+    {
+      "feature": "month_cos",
+      "gain": 0.0,
+      "gain_share": 0.0
     }
   ],
   "most_recommended": {
     "popularity": [
       {
         "destination_id": "bloemfontein-za",
-        "times_recommended": 2503,
+        "times_recommended": 2504,
         "city": "Bloemfontein",
         "country": "South Africa",
-        "share_of_users": 0.8980983135988518
+        "share_of_users": 0.8984571223537854
       },
       {
         "destination_id": "dubai-ae",
-        "times_recommended": 2466,
+        "times_recommended": 2465,
         "city": "Dubai",
         "country": "United Arab Emirates",
-        "share_of_users": 0.8848223896663079
+        "share_of_users": 0.8844635809113742
       },
       {
         "destination_id": "riyadh-sa",
-        "times_recommended": 2393,
+        "times_recommended": 2395,
         "city": "Riyadh",
         "country": "Saudi Arabia",
-        "share_of_users": 0.8586293505561535
+        "share_of_users": 0.8593469680660208
       },
       {
         "destination_id": "djibouti-dj",
-        "times_recommended": 2327,
+        "times_recommended": 2328,
         "city": "Djibouti",
         "country": "Djibouti",
-        "share_of_users": 0.8349479727305347
+        "share_of_users": 0.8353067814854682
       },
       {
         "destination_id": "visakhapatnam-in",
-        "times_recommended": 2308,
+        "times_recommended": 2305,
         "city": "Visakhapatnam",
         "country": "India",
-        "share_of_users": 0.8281306063867958
-      },
-      {
-        "destination_id": "khartoum-sd",
-        "times_recommended": 2285,
-        "city": "Khartoum",
-        "country": "Sudan",
-        "share_of_users": 0.8198780050233225
+        "share_of_users": 0.8270541801219949
       },
       {
         "destination_id": "tyre-lb",
@@ -459,457 +452,464 @@
         "share_of_users": 0.8191603875134553
       },
       {
+        "destination_id": "khartoum-sd",
+        "times_recommended": 2281,
+        "city": "Khartoum",
+        "country": "Sudan",
+        "share_of_users": 0.8184427700035881
+      },
+      {
         "destination_id": "punta-cana-do",
-        "times_recommended": 2219,
+        "times_recommended": 2221,
         "city": "Punta Cana",
         "country": "Dominican Republic",
-        "share_of_users": 0.7961966271977037
+        "share_of_users": 0.7969142447075709
       },
       {
         "destination_id": "lagos-ng",
-        "times_recommended": 2215,
+        "times_recommended": 2218,
         "city": "Lagos",
         "country": "Nigeria",
-        "share_of_users": 0.7947613921779692
+        "share_of_users": 0.79583781844277
       },
       {
         "destination_id": "mobile-us",
-        "times_recommended": 2184,
+        "times_recommended": 2182,
         "city": "Mobile",
         "country": "United States",
-        "share_of_users": 0.7836383207750269
+        "share_of_users": 0.7829207032651597
       }
     ],
     "content": [
       {
-        "destination_id": "chicago-us",
-        "times_recommended": 948,
-        "city": "Chicago",
+        "destination_id": "boise-us",
+        "times_recommended": 676,
+        "city": "Boise",
         "country": "United States",
-        "share_of_users": 0.3401506996770721
-      },
-      {
-        "destination_id": "providence-us",
-        "times_recommended": 885,
-        "city": "Providence",
-        "country": "United States",
-        "share_of_users": 0.317545748116254
-      },
-      {
-        "destination_id": "charlotte-us",
-        "times_recommended": 764,
-        "city": "Charlotte",
-        "country": "United States",
-        "share_of_users": 0.27412988876928596
-      },
-      {
-        "destination_id": "sacramento-us",
-        "times_recommended": 724,
-        "city": "Sacramento",
-        "country": "United States",
-        "share_of_users": 0.25977753857194114
-      },
-      {
-        "destination_id": "tulsa-us",
-        "times_recommended": 697,
-        "city": "Tulsa",
-        "country": "United States",
-        "share_of_users": 0.2500897021887334
+        "share_of_users": 0.24255471833512737
       },
       {
         "destination_id": "kampala-ug",
-        "times_recommended": 654,
+        "times_recommended": 646,
         "city": "Kampala",
         "country": "Uganda",
-        "share_of_users": 0.23466092572658773
+        "share_of_users": 0.23179045568711876
+      },
+      {
+        "destination_id": "charlotte-us",
+        "times_recommended": 587,
+        "city": "Charlotte",
+        "country": "United States",
+        "share_of_users": 0.21062073914603516
       },
       {
         "destination_id": "nairobi-ke",
-        "times_recommended": 651,
+        "times_recommended": 536,
         "city": "Nairobi",
         "country": "Kenya",
-        "share_of_users": 0.23358449946178686
+        "share_of_users": 0.19232149264442053
       },
       {
-        "destination_id": "boise-us",
-        "times_recommended": 595,
-        "city": "Boise",
+        "destination_id": "harare-zw",
+        "times_recommended": 481,
+        "city": "Harare",
+        "country": "Zimbabwe",
+        "share_of_users": 0.1725870111230714
+      },
+      {
+        "destination_id": "san-antonio-us",
+        "times_recommended": 474,
+        "city": "San Antonio",
         "country": "United States",
-        "share_of_users": 0.21349120918550413
+        "share_of_users": 0.17007534983853606
       },
       {
-        "destination_id": "atlanta-us",
-        "times_recommended": 469,
-        "city": "Atlanta",
+        "destination_id": "algiers-dz",
+        "times_recommended": 473,
+        "city": "Algiers",
+        "country": "Algeria",
+        "share_of_users": 0.16971654108360243
+      },
+      {
+        "destination_id": "huntsville-us",
+        "times_recommended": 465,
+        "city": "Huntsville",
         "country": "United States",
-        "share_of_users": 0.16828130606386796
+        "share_of_users": 0.1668460710441335
       },
       {
-        "destination_id": "durban-za",
-        "times_recommended": 443,
-        "city": "Durban",
-        "country": "South Africa",
-        "share_of_users": 0.15895227843559384
+        "destination_id": "dar-es-salaam-tz",
+        "times_recommended": 439,
+        "city": "Dar es Salaam",
+        "country": "Tanzania",
+        "share_of_users": 0.15751704341585934
+      },
+      {
+        "destination_id": "providence-us",
+        "times_recommended": 406,
+        "city": "Providence",
+        "country": "United States",
+        "share_of_users": 0.1456763545030499
       }
     ],
     "collaborative": [
       {
         "destination_id": "punta-cana-do",
-        "times_recommended": 1258,
+        "times_recommended": 1262,
         "city": "Punta Cana",
         "country": "Dominican Republic",
-        "share_of_users": 0.4513814137064944
+        "share_of_users": 0.4528166487262289
       },
       {
         "destination_id": "khartoum-sd",
-        "times_recommended": 1195,
+        "times_recommended": 1184,
         "city": "Khartoum",
         "country": "Sudan",
-        "share_of_users": 0.42877646214567633
+        "share_of_users": 0.4248295658414065
       },
       {
         "destination_id": "abuja-ng",
-        "times_recommended": 969,
+        "times_recommended": 985,
         "city": "Abuja",
         "country": "Nigeria",
-        "share_of_users": 0.34768568353067814
+        "share_of_users": 0.3534266236096161
       },
       {
         "destination_id": "djibouti-dj",
-        "times_recommended": 868,
+        "times_recommended": 864,
         "city": "Djibouti",
         "country": "Djibouti",
-        "share_of_users": 0.3114459992823825
+        "share_of_users": 0.310010764262648
       },
       {
         "destination_id": "riyadh-sa",
-        "times_recommended": 826,
+        "times_recommended": 831,
         "city": "Riyadh",
         "country": "Saudi Arabia",
-        "share_of_users": 0.29637603157517045
-      },
-      {
-        "destination_id": "tyre-lb",
-        "times_recommended": 821,
-        "city": "Tyre",
-        "country": "Lebanon",
-        "share_of_users": 0.2945819878005023
+        "share_of_users": 0.2981700753498385
       },
       {
         "destination_id": "visakhapatnam-in",
-        "times_recommended": 821,
+        "times_recommended": 827,
         "city": "Visakhapatnam",
         "country": "India",
-        "share_of_users": 0.2945819878005023
+        "share_of_users": 0.29673484033010405
+      },
+      {
+        "destination_id": "tyre-lb",
+        "times_recommended": 811,
+        "city": "Tyre",
+        "country": "Lebanon",
+        "share_of_users": 0.2909939002511661
       },
       {
         "destination_id": "dar-es-salaam-tz",
-        "times_recommended": 726,
+        "times_recommended": 718,
         "city": "Dar es Salaam",
         "country": "Tanzania",
-        "share_of_users": 0.2604951560818084
-      },
-      {
-        "destination_id": "pretoria-za",
-        "times_recommended": 661,
-        "city": "Pretoria",
-        "country": "South Africa",
-        "share_of_users": 0.23717258701112306
+        "share_of_users": 0.25762468604233946
       },
       {
         "destination_id": "lagos-ng",
-        "times_recommended": 650,
+        "times_recommended": 672,
         "city": "Lagos",
         "country": "Nigeria",
-        "share_of_users": 0.23322569070685326
+        "share_of_users": 0.2411194833153929
+      },
+      {
+        "destination_id": "pretoria-za",
+        "times_recommended": 662,
+        "city": "Pretoria",
+        "country": "South Africa",
+        "share_of_users": 0.2375313957660567
       }
     ],
     "matrix_factorization": [
       {
+        "destination_id": "cambridge-us",
+        "times_recommended": 171,
+        "city": "Cambridge",
+        "country": "United States",
+        "share_of_users": 0.061356297093649086
+      },
+      {
         "destination_id": "cambridge-gb",
-        "times_recommended": 184,
+        "times_recommended": 161,
         "city": "Cambridge",
         "country": "United Kingdom",
-        "share_of_users": 0.06602081090778615
-      },
-      {
-        "destination_id": "oxford-gb",
-        "times_recommended": 155,
-        "city": "Oxford",
-        "country": "United Kingdom",
-        "share_of_users": 0.05561535701471116
-      },
-      {
-        "destination_id": "hamilton-ca",
-        "times_recommended": 152,
-        "city": "Hamilton",
-        "country": "Canada",
-        "share_of_users": 0.0545389307499103
+        "share_of_users": 0.05776820954431288
       },
       {
         "destination_id": "syracuse-us",
-        "times_recommended": 152,
+        "times_recommended": 159,
         "city": "Syracuse",
         "country": "United States",
-        "share_of_users": 0.0545389307499103
+        "share_of_users": 0.05705059203444564
       },
       {
-        "destination_id": "sofia-bg",
-        "times_recommended": 152,
-        "city": "Sofia",
-        "country": "Bulgaria",
-        "share_of_users": 0.0545389307499103
-      },
-      {
-        "destination_id": "cambridge-us",
-        "times_recommended": 151,
-        "city": "Cambridge",
-        "country": "United States",
-        "share_of_users": 0.054180121994976675
-      },
-      {
-        "destination_id": "yakutsk-ru",
-        "times_recommended": 150,
-        "city": "Yakutsk",
-        "country": "Russia",
-        "share_of_users": 0.05382131324004306
-      },
-      {
-        "destination_id": "nice-fr",
-        "times_recommended": 147,
-        "city": "Nice",
-        "country": "France",
-        "share_of_users": 0.0527448869752422
-      },
-      {
-        "destination_id": "queens-us",
-        "times_recommended": 142,
-        "city": "Queens",
-        "country": "United States",
-        "share_of_users": 0.050950843200574095
+        "destination_id": "koln-de",
+        "times_recommended": 156,
+        "city": "K\u00f6ln",
+        "country": "Germany",
+        "share_of_users": 0.05597416576964478
       },
       {
         "destination_id": "newark-us",
-        "times_recommended": 142,
+        "times_recommended": 154,
         "city": "Newark",
         "country": "United States",
-        "share_of_users": 0.050950843200574095
+        "share_of_users": 0.055256548259777535
+      },
+      {
+        "destination_id": "genoa-it",
+        "times_recommended": 149,
+        "city": "Genoa",
+        "country": "Italy",
+        "share_of_users": 0.05346250448510944
+      },
+      {
+        "destination_id": "hamilton-ca",
+        "times_recommended": 147,
+        "city": "Hamilton",
+        "country": "Canada",
+        "share_of_users": 0.0527448869752422
+      },
+      {
+        "destination_id": "yakutsk-ru",
+        "times_recommended": 147,
+        "city": "Yakutsk",
+        "country": "Russia",
+        "share_of_users": 0.0527448869752422
+      },
+      {
+        "destination_id": "cardiff-gb",
+        "times_recommended": 144,
+        "city": "Cardiff",
+        "country": "United Kingdom",
+        "share_of_users": 0.05166846071044134
+      },
+      {
+        "destination_id": "aberdeen-gb",
+        "times_recommended": 138,
+        "city": "Aberdeen",
+        "country": "United Kingdom",
+        "share_of_users": 0.04951560818083961
       }
     ],
     "hybrid": [
       {
         "destination_id": "punta-cana-do",
-        "times_recommended": 1258,
+        "times_recommended": 1262,
         "city": "Punta Cana",
         "country": "Dominican Republic",
-        "share_of_users": 0.4513814137064944
+        "share_of_users": 0.4528166487262289
       },
       {
         "destination_id": "khartoum-sd",
-        "times_recommended": 1195,
+        "times_recommended": 1184,
         "city": "Khartoum",
         "country": "Sudan",
-        "share_of_users": 0.42877646214567633
+        "share_of_users": 0.4248295658414065
       },
       {
         "destination_id": "abuja-ng",
-        "times_recommended": 969,
+        "times_recommended": 985,
         "city": "Abuja",
         "country": "Nigeria",
-        "share_of_users": 0.34768568353067814
+        "share_of_users": 0.3534266236096161
       },
       {
         "destination_id": "djibouti-dj",
-        "times_recommended": 868,
+        "times_recommended": 864,
         "city": "Djibouti",
         "country": "Djibouti",
-        "share_of_users": 0.3114459992823825
+        "share_of_users": 0.310010764262648
       },
       {
         "destination_id": "riyadh-sa",
-        "times_recommended": 826,
+        "times_recommended": 831,
         "city": "Riyadh",
         "country": "Saudi Arabia",
-        "share_of_users": 0.29637603157517045
-      },
-      {
-        "destination_id": "tyre-lb",
-        "times_recommended": 821,
-        "city": "Tyre",
-        "country": "Lebanon",
-        "share_of_users": 0.2945819878005023
+        "share_of_users": 0.2981700753498385
       },
       {
         "destination_id": "visakhapatnam-in",
-        "times_recommended": 821,
+        "times_recommended": 827,
         "city": "Visakhapatnam",
         "country": "India",
-        "share_of_users": 0.2945819878005023
+        "share_of_users": 0.29673484033010405
+      },
+      {
+        "destination_id": "tyre-lb",
+        "times_recommended": 811,
+        "city": "Tyre",
+        "country": "Lebanon",
+        "share_of_users": 0.2909939002511661
       },
       {
         "destination_id": "dar-es-salaam-tz",
-        "times_recommended": 726,
+        "times_recommended": 718,
         "city": "Dar es Salaam",
         "country": "Tanzania",
-        "share_of_users": 0.2604951560818084
-      },
-      {
-        "destination_id": "pretoria-za",
-        "times_recommended": 661,
-        "city": "Pretoria",
-        "country": "South Africa",
-        "share_of_users": 0.23717258701112306
+        "share_of_users": 0.25762468604233946
       },
       {
         "destination_id": "lagos-ng",
-        "times_recommended": 650,
+        "times_recommended": 672,
         "city": "Lagos",
         "country": "Nigeria",
-        "share_of_users": 0.23322569070685326
+        "share_of_users": 0.2411194833153929
+      },
+      {
+        "destination_id": "pretoria-za",
+        "times_recommended": 662,
+        "city": "Pretoria",
+        "country": "South Africa",
+        "share_of_users": 0.2375313957660567
       }
     ],
     "next_destination": [
       {
-        "destination_id": "addis-ababa-et",
-        "times_recommended": 459,
-        "city": "Addis Ababa",
-        "country": "Ethiopia",
-        "share_of_users": 0.16469321851453175
+        "destination_id": "khartoum-sd",
+        "times_recommended": 572,
+        "city": "Khartoum",
+        "country": "Sudan",
+        "share_of_users": 0.20523860782203085
+      },
+      {
+        "destination_id": "djibouti-dj",
+        "times_recommended": 478,
+        "city": "Djibouti",
+        "country": "Djibouti",
+        "share_of_users": 0.17151058485827053
+      },
+      {
+        "destination_id": "mobile-us",
+        "times_recommended": 447,
+        "city": "Mobile",
+        "country": "United States",
+        "share_of_users": 0.1603875134553283
+      },
+      {
+        "destination_id": "dubai-ae",
+        "times_recommended": 416,
+        "city": "Dubai",
+        "country": "United Arab Emirates",
+        "share_of_users": 0.14926444205238606
+      },
+      {
+        "destination_id": "abu-dhabi-ae",
+        "times_recommended": 411,
+        "city": "Abu Dhabi",
+        "country": "United Arab Emirates",
+        "share_of_users": 0.147470398277718
+      },
+      {
+        "destination_id": "dar-es-salaam-tz",
+        "times_recommended": 405,
+        "city": "Dar es Salaam",
+        "country": "Tanzania",
+        "share_of_users": 0.14531754574811626
       },
       {
         "destination_id": "nashville-us",
-        "times_recommended": 456,
+        "times_recommended": 387,
         "city": "Nashville",
         "country": "United States",
-        "share_of_users": 0.16361679224973089
-      },
-      {
-        "destination_id": "nairobi-ke",
-        "times_recommended": 401,
-        "city": "Nairobi",
-        "country": "Kenya",
-        "share_of_users": 0.14388231072838178
-      },
-      {
-        "destination_id": "kampala-ug",
-        "times_recommended": 350,
-        "city": "Kampala",
-        "country": "Uganda",
-        "share_of_users": 0.12558306422676713
+        "share_of_users": 0.13885898815931108
       },
       {
         "destination_id": "new-orleans-us",
-        "times_recommended": 343,
+        "times_recommended": 368,
         "city": "New Orleans",
         "country": "United States",
-        "share_of_users": 0.12307140294223179
+        "share_of_users": 0.1320416218155723
       },
       {
-        "destination_id": "memphis-us",
-        "times_recommended": 338,
-        "city": "Memphis",
-        "country": "United States",
-        "share_of_users": 0.12127735916756369
+        "destination_id": "addis-ababa-et",
+        "times_recommended": 368,
+        "city": "Addis Ababa",
+        "country": "Ethiopia",
+        "share_of_users": 0.1320416218155723
       },
       {
-        "destination_id": "austin-us",
-        "times_recommended": 306,
-        "city": "Austin",
-        "country": "United States",
-        "share_of_users": 0.10979547900968784
-      },
-      {
-        "destination_id": "doha-qa",
-        "times_recommended": 303,
-        "city": "Doha",
-        "country": "Qatar",
-        "share_of_users": 0.10871905274488698
-      },
-      {
-        "destination_id": "cairo-eg",
-        "times_recommended": 301,
-        "city": "Cairo",
-        "country": "Egypt",
-        "share_of_users": 0.10800143523501973
-      },
-      {
-        "destination_id": "san-antonio-us",
-        "times_recommended": 298,
-        "city": "San Antonio",
-        "country": "United States",
-        "share_of_users": 0.10692500897021888
+        "destination_id": "riyadh-sa",
+        "times_recommended": 360,
+        "city": "Riyadh",
+        "country": "Saudi Arabia",
+        "share_of_users": 0.12917115177610333
       }
     ],
     "learning_to_rank": [
       {
         "destination_id": "punta-cana-do",
-        "times_recommended": 999,
+        "times_recommended": 1090,
         "city": "Punta Cana",
         "country": "Dominican Republic",
-        "share_of_users": 0.35844994617868675
+        "share_of_users": 0.3911015428776462
       },
       {
         "destination_id": "abuja-ng",
-        "times_recommended": 923,
+        "times_recommended": 1048,
         "city": "Abuja",
         "country": "Nigeria",
-        "share_of_users": 0.33118048080373164
-      },
-      {
-        "destination_id": "tyre-lb",
-        "times_recommended": 844,
-        "city": "Tyre",
-        "country": "Lebanon",
-        "share_of_users": 0.3028345891639756
+        "share_of_users": 0.3760315751704342
       },
       {
         "destination_id": "khartoum-sd",
-        "times_recommended": 843,
+        "times_recommended": 936,
         "city": "Khartoum",
         "country": "Sudan",
-        "share_of_users": 0.302475780409042
+        "share_of_users": 0.33584499461786865
+      },
+      {
+        "destination_id": "tyre-lb",
+        "times_recommended": 835,
+        "city": "Tyre",
+        "country": "Lebanon",
+        "share_of_users": 0.299605310369573
       },
       {
         "destination_id": "riyadh-sa",
-        "times_recommended": 842,
+        "times_recommended": 830,
         "city": "Riyadh",
         "country": "Saudi Arabia",
-        "share_of_users": 0.30211697165410833
-      },
-      {
-        "destination_id": "djibouti-dj",
-        "times_recommended": 771,
-        "city": "Djibouti",
-        "country": "Djibouti",
-        "share_of_users": 0.2766415500538213
+        "share_of_users": 0.2978112665949049
       },
       {
         "destination_id": "visakhapatnam-in",
-        "times_recommended": 714,
+        "times_recommended": 816,
         "city": "Visakhapatnam",
         "country": "India",
-        "share_of_users": 0.25618945102260493
+        "share_of_users": 0.29278794402583425
       },
       {
         "destination_id": "mobile-us",
-        "times_recommended": 681,
+        "times_recommended": 743,
         "city": "Mobile",
         "country": "United States",
-        "share_of_users": 0.24434876210979548
+        "share_of_users": 0.26659490491567994
       },
       {
-        "destination_id": "dubai-ae",
-        "times_recommended": 605,
-        "city": "Dubai",
-        "country": "United Arab Emirates",
-        "share_of_users": 0.21707929673484033
+        "destination_id": "djibouti-dj",
+        "times_recommended": 701,
+        "city": "Djibouti",
+        "country": "Djibouti",
+        "share_of_users": 0.2515249372084679
       },
       {
-        "destination_id": "fort-worth-us",
-        "times_recommended": 533,
-        "city": "Fort Worth",
-        "country": "United States",
-        "share_of_users": 0.19124506637961966
+        "destination_id": "dar-es-salaam-tz",
+        "times_recommended": 579,
+        "city": "Dar es Salaam",
+        "country": "Tanzania",
+        "share_of_users": 0.2077502691065662
+      },
+      {
+        "destination_id": "lagos-ng",
+        "times_recommended": 555,
+        "city": "Lagos",
+        "country": "Nigeria",
+        "share_of_users": 0.1991388589881593
       }
     ]
   }

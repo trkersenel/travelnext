@@ -3,7 +3,7 @@
 ## Destination catalog (real data)
 
 - **400** destinations across **107** countries and **6** continents
-- OpenStreetMap attributes available for **99.5%**
+- OpenStreetMap attributes available for **100.0%**
 - Climate normals available for **100.0%**
 - Country cost proxy available for **99.2%**
 

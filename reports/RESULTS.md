@@ -16,41 +16,41 @@
 
 | Model | Precision@5 | Recall@5 | F1@5 | MAP@5 | MRR@5 | NDCG@5 |
 |---|---:|---:|---:|---:|---:|---:|
-| Collaborative filtering (item-item) | 0.0981 | 0.2452 | 0.1401 | 0.1592 | 0.2808 | 0.2129 |
-| Hybrid (tuned weights) | 0.0981 | 0.2452 | 0.1401 | 0.1592 | 0.2808 | 0.2129 |
-| Learning-to-Rank (LightGBM) | 0.0886 | 0.2214 | 0.1265 | 0.1400 | 0.2493 | 0.1893 |
-| Next-destination (transition-aware) | 0.0386 | 0.0965 | 0.0552 | 0.0536 | 0.0973 | 0.0764 |
-| Popularity baseline | 0.0316 | 0.0789 | 0.0451 | 0.0347 | 0.0647 | 0.0549 |
-| Content-based | 0.0214 | 0.0535 | 0.0306 | 0.0272 | 0.0504 | 0.0403 |
-| Matrix factorisation (SVD) | 0.0112 | 0.0280 | 0.0160 | 0.0146 | 0.0279 | 0.0216 |
+| Collaborative filtering (item-item) | 0.0976 | 0.2440 | 0.1394 | 0.1584 | 0.2798 | 0.2118 |
+| Hybrid (tuned weights) | 0.0976 | 0.2440 | 0.1394 | 0.1584 | 0.2798 | 0.2118 |
+| Learning-to-Rank (LightGBM) | 0.0918 | 0.2295 | 0.1311 | 0.1455 | 0.2558 | 0.1959 |
+| Next-destination (transition-aware) | 0.0477 | 0.1193 | 0.0682 | 0.0668 | 0.1210 | 0.0948 |
+| Popularity baseline | 0.0310 | 0.0775 | 0.0443 | 0.0340 | 0.0633 | 0.0538 |
+| Content-based | 0.0312 | 0.0780 | 0.0446 | 0.0401 | 0.0741 | 0.0592 |
+| Matrix factorisation (SVD) | 0.0111 | 0.0276 | 0.0158 | 0.0148 | 0.0284 | 0.0217 |
 
 ### K = 10
 
 | Model | Precision@10 | Recall@10 | F1@10 | MAP@10 | MRR@10 | NDCG@10 |
 |---|---:|---:|---:|---:|---:|---:|
-| Collaborative filtering (item-item) | 0.0632 | 0.3159 | 0.1053 | 0.1720 | 0.2928 | 0.2409 |
-| Hybrid (tuned weights) | 0.0632 | 0.3159 | 0.1053 | 0.1720 | 0.2928 | 0.2409 |
-| Learning-to-Rank (LightGBM) | 0.0588 | 0.2940 | 0.0980 | 0.1527 | 0.2628 | 0.2182 |
-| Next-destination (transition-aware) | 0.0298 | 0.1489 | 0.0496 | 0.0622 | 0.1076 | 0.0970 |
-| Popularity baseline | 0.0287 | 0.1435 | 0.0478 | 0.0449 | 0.0805 | 0.0810 |
-| Content-based | 0.0170 | 0.0852 | 0.0284 | 0.0317 | 0.0576 | 0.0527 |
-| Matrix factorisation (SVD) | 0.0090 | 0.0452 | 0.0151 | 0.0170 | 0.0318 | 0.0283 |
+| Collaborative filtering (item-item) | 0.0631 | 0.3156 | 0.1052 | 0.1712 | 0.2922 | 0.2401 |
+| Hybrid (tuned weights) | 0.0631 | 0.3156 | 0.1052 | 0.1712 | 0.2922 | 0.2401 |
+| Learning-to-Rank (LightGBM) | 0.0617 | 0.3086 | 0.1029 | 0.1592 | 0.2709 | 0.2273 |
+| Next-destination (transition-aware) | 0.0379 | 0.1896 | 0.0632 | 0.0782 | 0.1352 | 0.1226 |
+| Popularity baseline | 0.0284 | 0.1421 | 0.0474 | 0.0442 | 0.0791 | 0.0799 |
+| Content-based | 0.0252 | 0.1261 | 0.0420 | 0.0474 | 0.0851 | 0.0783 |
+| Matrix factorisation (SVD) | 0.0090 | 0.0450 | 0.0150 | 0.0173 | 0.0328 | 0.0286 |
 
 ### K = 20
 
 | Model | Precision@20 | Recall@20 | F1@20 | MAP@20 | MRR@20 | NDCG@20 |
 |---|---:|---:|---:|---:|---:|---:|
-| Collaborative filtering (item-item) | 0.0383 | 0.3827 | 0.0696 | 0.1785 | 0.2983 | 0.2615 |
-| Hybrid (tuned weights) | 0.0383 | 0.3827 | 0.0696 | 0.1785 | 0.2983 | 0.2615 |
-| Learning-to-Rank (LightGBM) | 0.0370 | 0.3699 | 0.0673 | 0.1600 | 0.2696 | 0.2418 |
-| Next-destination (transition-aware) | 0.0224 | 0.2237 | 0.0407 | 0.0687 | 0.1150 | 0.1201 |
-| Popularity baseline | 0.0261 | 0.2614 | 0.0475 | 0.0545 | 0.0937 | 0.1174 |
-| Content-based | 0.0136 | 0.1362 | 0.0248 | 0.0357 | 0.0634 | 0.0684 |
-| Matrix factorisation (SVD) | 0.0076 | 0.0759 | 0.0138 | 0.0193 | 0.0355 | 0.0377 |
+| Collaborative filtering (item-item) | 0.0383 | 0.3830 | 0.0696 | 0.1778 | 0.2977 | 0.2610 |
+| Hybrid (tuned weights) | 0.0383 | 0.3830 | 0.0696 | 0.1778 | 0.2977 | 0.2610 |
+| Learning-to-Rank (LightGBM) | 0.0378 | 0.3780 | 0.0687 | 0.1658 | 0.2770 | 0.2489 |
+| Next-destination (transition-aware) | 0.0280 | 0.2801 | 0.0509 | 0.0866 | 0.1433 | 0.1505 |
+| Popularity baseline | 0.0260 | 0.2600 | 0.0473 | 0.0538 | 0.0924 | 0.1163 |
+| Content-based | 0.0191 | 0.1905 | 0.0346 | 0.0530 | 0.0916 | 0.0981 |
+| Matrix factorisation (SVD) | 0.0078 | 0.0775 | 0.0141 | 0.0198 | 0.0368 | 0.0387 |
 
 ### Candidate generation
 
-Stage-1 recall on the test split: **0.8770**. This is the ceiling on the two-stage system: any held-out destination that candidate generation discards cannot be recovered by the ranker.
+Stage-1 recall on the test split: **0.8780**. This is the ceiling on the two-stage system: any held-out destination that candidate generation discards cannot be recovered by the ranker.
 
 ### Tuned hybrid weights
 
@@ -69,13 +69,13 @@ Accuracy alone cannot distinguish a good recommender from one that shows everybo
 
 | Model | Catalog coverage | Unique shown | Gini | Mean popularity pct | From top decile | Novelty | Intra-list diversity | Geo spread (km) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Popularity baseline | 0.045 | 18 | 0.970 | 0.372 | 0.088 | 2.28 | 0.185 | 6999 |
-| Content-based | 0.960 | 384 | 0.672 | 0.543 | 0.105 | 1.25 | 0.026 | 4107 |
-| Collaborative filtering (item-item) | 0.787 | 315 | 0.869 | 0.394 | 0.038 | 2.05 | 0.116 | 6749 |
-| Matrix factorisation (SVD) | 0.950 | 380 | 0.282 | 0.477 | 0.079 | 1.49 | 0.033 | 5480 |
-| Hybrid (tuned weights) | 0.787 | 315 | 0.869 | 0.394 | 0.038 | 2.05 | 0.116 | 6749 |
-| Next-destination (transition-aware) | 0.973 | 389 | 0.570 | 0.624 | 0.172 | 1.03 | 0.034 | 1955 |
-| Learning-to-Rank (LightGBM) | 0.958 | 383 | 0.713 | 0.489 | 0.119 | 1.65 | 0.108 | 6640 |
+| Popularity baseline | 0.045 | 18 | 0.970 | 0.373 | 0.088 | 2.28 | 0.821 | 6999 |
+| Content-based | 0.995 | 398 | 0.614 | 0.509 | 0.072 | 1.43 | 0.624 | 3979 |
+| Collaborative filtering (item-item) | 0.772 | 309 | 0.870 | 0.395 | 0.039 | 2.04 | 0.778 | 6753 |
+| Matrix factorisation (SVD) | 0.958 | 383 | 0.274 | 0.474 | 0.075 | 1.50 | 0.918 | 5502 |
+| Hybrid (tuned weights) | 0.772 | 309 | 0.870 | 0.395 | 0.039 | 2.04 | 0.778 | 6753 |
+| Next-destination (transition-aware) | 0.975 | 390 | 0.587 | 0.577 | 0.148 | 1.24 | 0.719 | 2102 |
+| Learning-to-Rank (LightGBM) | 0.953 | 381 | 0.741 | 0.445 | 0.090 | 1.82 | 0.851 | 6537 |
 
 - **Catalog coverage** — share of destinations that appear in at least one user's top 10.
 - **Gini** — concentration of exposure across the catalog (0 = perfectly even, 1 = one destination takes everything).
@@ -84,13 +84,13 @@ Accuracy alone cannot distinguish a good recommender from one that shows everybo
 
 ## What each model recommends most often
 
-- **Popularity baseline**: Bloemfontein (90%), Dubai (88%), Riyadh (86%), Djibouti (83%), Visakhapatnam (83%), Khartoum (82%)
-- **Content-based**: Chicago (34%), Providence (32%), Charlotte (27%), Sacramento (26%), Tulsa (25%), Kampala (23%)
-- **Collaborative filtering (item-item)**: Punta Cana (45%), Khartoum (43%), Abuja (35%), Djibouti (31%), Riyadh (30%), Tyre (29%)
-- **Matrix factorisation (SVD)**: Cambridge (7%), Oxford (6%), Hamilton (5%), Syracuse (5%), Sofia (5%), Cambridge (5%)
-- **Hybrid (tuned weights)**: Punta Cana (45%), Khartoum (43%), Abuja (35%), Djibouti (31%), Riyadh (30%), Tyre (29%)
-- **Next-destination (transition-aware)**: Addis Ababa (16%), Nashville (16%), Nairobi (14%), Kampala (13%), New Orleans (12%), Memphis (12%)
-- **Learning-to-Rank (LightGBM)**: Punta Cana (36%), Abuja (33%), Tyre (30%), Khartoum (30%), Riyadh (30%), Djibouti (28%)
+- **Popularity baseline**: Bloemfontein (90%), Dubai (88%), Riyadh (86%), Djibouti (84%), Visakhapatnam (83%), Tyre (82%)
+- **Content-based**: Boise (24%), Kampala (23%), Charlotte (21%), Nairobi (19%), Harare (17%), San Antonio (17%)
+- **Collaborative filtering (item-item)**: Punta Cana (45%), Khartoum (42%), Abuja (35%), Djibouti (31%), Riyadh (30%), Visakhapatnam (30%)
+- **Matrix factorisation (SVD)**: Cambridge (6%), Cambridge (6%), Syracuse (6%), Köln (6%), Newark (6%), Genoa (5%)
+- **Hybrid (tuned weights)**: Punta Cana (45%), Khartoum (42%), Abuja (35%), Djibouti (31%), Riyadh (30%), Visakhapatnam (30%)
+- **Next-destination (transition-aware)**: Khartoum (21%), Djibouti (17%), Mobile (16%), Dubai (15%), Abu Dhabi (15%), Dar es Salaam (15%)
+- **Learning-to-Rank (LightGBM)**: Punta Cana (39%), Abuja (38%), Khartoum (34%), Tyre (30%), Riyadh (30%), Visakhapatnam (29%)
 
 ## What the ranker actually learned
 
@@ -98,18 +98,18 @@ Gain-based feature importance from the LightGBM LambdaRank model. The explanatio
 
 | Feature | Gain share |
 |---|---:|
-| `collaborative_score` | 0.647 |
+| `collaborative_score` | 0.682 |
 | `max_cf_similarity` | 0.104 |
-| `distance_km_log` | 0.039 |
-| `history_length` | 0.038 |
-| `popularity_score` | 0.037 |
-| `profile_cosine` | 0.028 |
-| `from_geographic` | 0.021 |
-| `from_collaborative` | 0.014 |
-| `content_score` | 0.012 |
-| `from_content` | 0.010 |
+| `distance_km_log` | 0.043 |
+| `history_length` | 0.034 |
+| `popularity_score` | 0.034 |
+| `profile_cosine` | 0.032 |
+| `from_collaborative` | 0.017 |
+| `from_geographic` | 0.014 |
 | `from_popularity` | 0.009 |
-| `popularity_percentile` | 0.009 |
+| `popularity_percentile` | 0.007 |
 | `proximity` | 0.007 |
-| `mean_content_similarity` | 0.005 |
-| `context_score` | 0.004 |
+| `content_score` | 0.005 |
+| `from_content` | 0.005 |
+| `cost_percentile` | 0.002 |
+| `mean_content_similarity` | 0.002 |

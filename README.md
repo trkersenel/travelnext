@@ -130,43 +130,51 @@ from 4,000 generated users (2,787 evaluable), leave-last-2-out:
 
 | Model | NDCG@10 | Recall@10 | MAP@10 | MRR@10 | Catalog coverage | From top-decile |
 |---|---:|---:|---:|---:|---:|---:|
-| **Collaborative filtering (item-item)** | **0.2409** | 0.3159 | **0.1720** | **0.2928** | 0.787 | **0.038** |
-| Hybrid (tuned) | 0.2408 | **0.3186** | 0.1711 | 0.2914 | 0.877 | 0.051 |
-| Learning-to-Rank (LightGBM) | 0.2182 | 0.2940 | 0.1527 | 0.2628 | 0.958 | 0.119 |
-| Next-destination (transition-aware) | 0.1648 | 0.2460 | 0.1083 | 0.1858 | **0.995** | 0.090 |
-| Popularity baseline | 0.0810 | 0.1435 | 0.0449 | 0.0805 | 0.045 | 0.088 |
-| Content-based | 0.0527 | 0.0852 | 0.0317 | 0.0576 | 0.960 | 0.105 |
-| Matrix factorisation (SVD) | 0.0283 | 0.0452 | 0.0170 | 0.0318 | 0.950 | 0.079 |
+| **Collaborative filtering (item-item)** | **0.2401** | **0.3156** | **0.1712** | **0.2922** | 0.773 | **0.039** |
+| Hybrid (tuned = pure collaborative) | 0.2401 | 0.3156 | 0.1712 | 0.2922 | 0.773 | 0.039 |
+| Learning-to-Rank (LightGBM) | 0.2273 | 0.3086 | 0.1592 | 0.2709 | 0.953 | 0.090 |
+| Next-destination (transition-aware) | 0.1226 | 0.1896 | 0.0782 | 0.1352 | 0.975 | 0.148 |
+| Popularity baseline | 0.0799 | 0.1421 | 0.0442 | 0.0791 | 0.045 | 0.088 |
+| Content-based | 0.0783 | 0.1261 | 0.0474 | 0.0851 | **0.995** | 0.072 |
+| Matrix factorisation (SVD) | 0.0286 | 0.0450 | 0.0173 | 0.0328 | 0.958 | 0.075 |
 
 ### What these results actually say
 
 **Every model beats the popularity baseline on accuracy** — necessary, since a
 baseline that is not beaten means the ML added nothing. But the baseline is the
-most revealing row in the table for a different reason: it achieves 0.081
+most revealing row in the table for a different reason: it achieves 0.080
 NDCG@10 while showing only **18 distinct destinations to 2,787 users**
 (coverage 0.045, Gini 0.970). That is precisely the failure this project exists
 to avoid, and it is invisible in an accuracy-only comparison.
 
-**The learning-to-rank stage does not beat plain collaborative filtering
-(0.218 vs 0.241), and this is reported rather than tuned away.** Two
-diagnoses were run:
+**The learning-to-rank stage still does not beat plain collaborative filtering
+(0.227 vs 0.240), and this is reported rather than tuned away.** Three
+diagnoses were run, each ruling out a candidate explanation:
 
-1. *Retrieval ceiling.* Stage-1 candidate recall is 0.877, so 12% of the
-   correct answers never reach the ranker. Widening the shortlist from 150 to
-   250 raised candidate recall from 0.722 to 0.877 (`n_candidates` is now sized
-   relative to the catalog for this reason).
-2. *Is the ranker itself weak?* Re-running with the **entire catalog** as
-   candidates (recall = 1.000) lifted the ranker to 0.2287 — still short of
-   0.2409.
+1. *Retrieval ceiling.* Stage-1 candidate recall was 0.722, so 28% of correct
+   answers never reached the ranker. Widening the shortlist from 150 to 250
+   raised it to 0.878 (`n_candidates` is now sized relative to the catalog).
+2. *Too little training data.* One example per user gave only ~4k groups for a
+   27-feature GBDT. Using every prefix of each history (predict trip *i* from
+   trips `0..i-1`) raised that to ~14.7k groups.
+3. *Train/serve mismatch in negative sampling.* Swept on validation against the
+   250-candidate inference set: 30 → 0.2470, 60 → 0.2484, 120 → 0.2429,
+   249 → 0.2475. Flat, so this was not the cause either.
 
-So retrieval explains most of the gap but not all of it: on this data the
+A fourth check settles it: re-running with the **entire catalog** as candidates
+(recall = 1.000) lifted the ranker to 0.2287, still short. So on this data the
 LambdaRank stage adds no lift over the collaborative score it consumes as a
-feature (which carries 53% of its gain). That is an honest negative result. It
-is also unsurprising given *how the data was made* — the generator's dominant
-mechanisms are co-visitation and geography, which item-item CF models directly,
-while the ranker pays a variance cost for sampled negatives. On real
+feature — and that feature carries **68%** of its total gain. That is an honest
+negative result. It is also unsurprising given *how the data was made*: the
+generator's dominant mechanisms are co-visitation and geography, which
+item-item CF models directly, so a learned ranker can only approximate an
+already-near-optimal analytic signal while paying a variance cost. On real
 interaction data, where the signal is not a known closed-form process, the
 two-stage architecture is where I would expect the ranker to earn its place.
+
+Note what the ranker *does* buy even while losing on accuracy: **0.953 catalog
+coverage against 0.773**, so it reaches far more of the catalog for a 5%
+relative NDCG cost.
 
 **The content model is weak on accuracy (0.053) but strong on coverage
 (0.960).** It is nonetheless load-bearing: it is what makes cold-start users and
@@ -209,9 +217,25 @@ relabelled as "tuned" that was not, and nothing known to be bad is shipped
 because a synthetic metric liked it. With real interaction data, the tuner
 should be trusted and this override removed.
 
-### One more measurement bug worth recording
+### Two more measurement bugs worth recording
 
-Components were originally blended after **min-max** normalisation. That is
+**The attribute model was measuring almost nothing.** `profile_*` shares were
+fed to cosine similarity as raw values. But every city devotes a broadly
+similar *share* of its POIs to each category — the column means run 0.08–0.13
+while the standard deviations are around 0.02 — so the shared component
+dominated. Measured on the catalog, the mean pairwise similarity between
+destinations was **0.953** (minimum 0.628): all 400 destinations looked ~95%
+alike, and "similar to Amsterdam" carried essentially no information.
+Z-scoring each category before normalising rows makes the comparison about how
+a city *deviates* from the typical profile, which is what "this is a museum
+city" actually means. Mean pairwise similarity dropped to 0.018 and content
+NDCG@10 rose from 0.0527 to 0.0783 (+49%); `similar_to("amsterdam-nl")` went
+from a near-arbitrary list to Tallinn, Rotterdam, Copenhagen, The Hague and
+Gent. The text/attribute weighting was then re-selected **on validation**
+(0.85/0.15; the test split preferred 0.70, which is exactly why the choice was
+not made there).
+
+**Components were originally blended after min-max normalisation.** That is
 wrong when the distributions have different *shapes*: content scores are dense
 (mean 0.37, 95th pct 0.52) while item-item CF is sparse with a single peak at
 exactly 1.0. A nominal 0.4/0.4 split was therefore not an even split of
@@ -386,16 +410,17 @@ These are real and are not worked around anywhere in the code:
    much of Africa and Asia, so absolute `score_*` values favour well-mapped
    regions. The `profile_*` shares are computed within a city and are much less
    affected, which is why the content model uses those.
-5. **`score_beaches` counts mapped beach *features*, not beach quality — and it
-   shows.** Oslo and Helsinki top the catalog on this attribute, because Nordic
-   cities have many small urban and lakeside beaches individually mapped, while
-   a single long Mediterranean beach may be one polygon. The number is a
-   faithful measurement of what OSM records; it is a poor proxy for "beach
-   holiday destination", and it is the clearest example in this project of the
-   gap between a measurable quantity and the concept a user has in mind.
-   Museums, nightlife, heritage and food do not suffer from this — their
-   rankings (Paris/London/Berlin for museums, Osaka/London/Madrid/Barcelona for
-   nightlife) match intuition closely.
+5. **`score_beaches` measures beach *area*, after counting proved to be the
+   wrong measurement.** The first version counted mapped beach features, and
+   Oslo and Helsinki topped the catalog: Nordic cities map many small urban and
+   fjord beaches individually, while a long Mediterranean beach is often a
+   single polygon. Oslo maps 58 beach features to Barcelona's 6. Switching to
+   the summed polygon area inverts that correctly — Barcelona has ~11x Oslo's
+   beach area — and the attribute now ranks Antalya, the Gold Coast, Marbella
+   and Chennai at the top. This was the clearest case in the project of a
+   measurable quantity that faithfully records the data while answering the
+   wrong question; the other categories (museums, nightlife, heritage, food)
+   are well served by counts and rank intuitively.
 6. **Catalog size is bounded by politeness, not capability.** Overpass grants
    about two query slots per client, so the catalog is capped and the ingestion
    deliberately runs slowly. `ingest.catalog_size` raises it if you are willing

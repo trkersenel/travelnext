@@ -19,6 +19,10 @@ Two complementary representations are produced for every category:
     it is reported as a percentile rather than a raw magnitude and the bias is
     documented in the README.
 
+    ``score_beaches`` is the exception: it is derived from mapped beach *area*,
+    because a count measures how finely a coastline was split into polygons
+    rather than how much beach exists. See ``add_attribute_features``.
+
 Nothing here fabricates a value: every feature is a documented transformation
 of a measured quantity, and cities without data keep an explicit missing flag.
 """
@@ -115,6 +119,16 @@ def add_attribute_features(frame: pd.DataFrame) -> pd.DataFrame:
     for name in CATEGORY_NAMES:
         column = np.log1p(_numeric_column(frame, f"poi_{name}").fillna(0.0))
         frame[f"score_{name}"] = percentile_rank(column)
+
+    # Beaches are scored by mapped AREA rather than feature count. A count
+    # measures how finely a coastline happens to be split into polygons, not
+    # how much beach there is: Oslo maps 56 small urban and fjord beaches and
+    # Barcelona 8 large ones, so counting ranked Oslo higher while Barcelona
+    # actually has ~14x the beach area. This is the one category where the
+    # obvious measurement is the wrong one.
+    beach_area = _numeric_column(frame, "beach_area_m2")
+    if beach_area.notna().any() and float(beach_area.fillna(0.0).max()) > 0:
+        frame["score_beaches"] = percentile_rank(np.log1p(beach_area.fillna(0.0)))
 
     # Cities with no OSM data must not look like "a city with zero museums".
     missing = ~frame["poi_available"].astype(bool)
@@ -231,17 +245,42 @@ def build_destination_features(raw: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
-def profile_matrix(frame: pd.DataFrame, categories: Sequence[str] = PROFILE_CATEGORIES) -> np.ndarray:
-    """Return the L2-normalised attribute-profile matrix for similarity work.
+def profile_matrix(
+    frame: pd.DataFrame,
+    categories: Sequence[str] = PROFILE_CATEGORIES,
+    *,
+    standardise: bool = True,
+) -> np.ndarray:
+    """Return the attribute-profile matrix used for similarity work.
 
-    Destinations without OSM data receive the column-wise mean profile so they
-    remain rankable (a cold-start destination should be recommendable, just not
-    confidently).
+    ``standardise`` (default) z-scores each category across destinations before
+    the rows are L2-normalised. This is not a cosmetic step -- without it the
+    model barely discriminates at all.
+
+    Every city devotes a similar *share* of its POIs to each category: the
+    column means run 0.08-0.13 while the standard deviations are around 0.02.
+    Cosine similarity over the raw shares is therefore dominated by that shared
+    component, and measured on this catalog it gave a mean pairwise similarity
+    of 0.953 (minimum 0.628) -- i.e. all 400 destinations looked ~95% alike, so
+    "similar to Amsterdam" carried almost no information.
+
+    Z-scoring first makes the comparison about how a city *deviates* from the
+    typical profile, which is what "this is a museum city" actually means.
+
+    Destinations without OSM data receive the mean profile, which maps to the
+    origin after standardisation: they stay rankable but assert nothing, which
+    is the honest representation of "we have no attribute data for this place".
     """
     columns: List[str] = [f"profile_{name}" for name in categories]
     matrix = frame[columns].astype("float64")
     matrix = matrix.fillna(matrix.mean(axis=0))
     values = matrix.to_numpy()
+
+    if standardise:
+        spread = values.std(axis=0)
+        spread[spread == 0] = 1.0
+        values = (values - values.mean(axis=0)) / spread
+
     norms = np.linalg.norm(values, axis=1, keepdims=True)
     norms[norms == 0] = 1.0
     return values / norms

@@ -22,6 +22,7 @@ bias rather than papering over it.
 
 from __future__ import annotations
 
+import math
 import queue
 import re
 import threading
@@ -216,6 +217,181 @@ def fetch_city_pois(
 
     LOGGER.warning("Overpass failed for %s (%.4f, %.4f)", cache_key, lat, lon)
     return None
+
+
+def _polygon_area_m2(geometry: Sequence[Dict[str, float]]) -> float:
+    """Area of a lat/lon ring in square metres via the shoelace formula.
+
+    Uses a local equirectangular projection centred on the ring. At the size of
+    a beach (metres to a few kilometres) the distortion is negligible, and it
+    avoids pulling in a geospatial dependency for one calculation.
+    """
+    points = [(p.get("lat"), p.get("lon")) for p in geometry or []]
+    points = [(la, lo) for la, lo in points if la is not None and lo is not None]
+    if len(points) < 3:
+        return 0.0
+
+    mean_lat = sum(p[0] for p in points) / len(points)
+    metres_per_deg_lat = 110_574.0
+    metres_per_deg_lon = 111_320.0 * math.cos(math.radians(mean_lat))
+
+    xs = [lo * metres_per_deg_lon for _, lo in points]
+    ys = [la * metres_per_deg_lat for la, _ in points]
+
+    total = 0.0
+    for i in range(len(points)):
+        j = (i + 1) % len(points)
+        total += xs[i] * ys[j] - xs[j] * ys[i]
+    return abs(total) / 2.0
+
+
+def fetch_beach_area(
+    lat: float,
+    lon: float,
+    *,
+    cache: HttpCache,
+    cache_key: str,
+    endpoints: Sequence[str],
+    radius_m: int = 4000,
+    timeout_s: int = 60,
+    retries: int = 4,
+    user_agent: str = "TravelNext/0.1",
+    session: Optional[requests.Session] = None,
+) -> Optional[float]:
+    """Total mapped beach area in square metres near a city centre.
+
+    Counting beach *features* is a poor measure of how much beach a place has,
+    and the failure is visible in the data: Oslo maps 56 separate small urban
+    and fjord beaches while Barcelona maps 8, so a count ranks Oslo as the more
+    beach-oriented destination. Summing the polygon area answers the question a
+    traveller is actually asking.
+    """
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return float(cached.get("beach_area_m2", 0.0))
+
+    query = (
+        f"[out:json][timeout:{timeout_s}];"
+        f'(way(around:{radius_m},{lat:.5f},{lon:.5f})["natural"="beach"];'
+        f'rel(around:{radius_m},{lat:.5f},{lon:.5f})["natural"="beach"];);'
+        f"out geom;"
+    )
+    http = session or requests
+    for attempt in range(retries):
+        endpoint = endpoints[attempt % len(endpoints)]
+        try:
+            response = http.post(
+                endpoint,
+                data={"data": query},
+                headers={"User-Agent": user_agent},
+                timeout=timeout_s + 30,
+            )
+            if response.status_code in (429, 504) or response.status_code >= 500:
+                wait = seconds_until_slot(endpoint, user_agent=user_agent, session=http)
+                time.sleep(min(wait, _MAX_COOLDOWN_S))
+                continue
+            response.raise_for_status()
+
+            total = 0.0
+            for element in response.json().get("elements", []):
+                if element.get("type") == "way":
+                    total += _polygon_area_m2(element.get("geometry", []))
+                elif element.get("type") == "relation":
+                    # Multipolygon: sum the outer rings only.
+                    for member in element.get("members", []):
+                        if member.get("role") in ("outer", ""):
+                            total += _polygon_area_m2(member.get("geometry", []))
+
+            cache.set(cache_key, {"beach_area_m2": total})
+            return total
+        except (requests.RequestException, ValueError):
+            time.sleep(_DEFAULT_COOLDOWN_S)
+
+    LOGGER.warning("Beach-area query failed for %s", cache_key)
+    return None
+
+
+def fetch_beach_area_table(
+    cities: pd.DataFrame,
+    cache_dir,
+    *,
+    endpoints: Sequence[str],
+    radius_m: int = 4000,
+    timeout_s: int = 60,
+    retries: int = 4,
+    sleep_between_s: float = 3.0,
+    user_agent: str = "TravelNext/0.1",
+    id_column: str = "destination_id",
+    progress_every: int = 50,
+) -> pd.DataFrame:
+    """Fetch mapped beach area for every city, one worker per mirror."""
+    cache = HttpCache(cache_dir, "beach_area")
+    work: "queue.Queue[Tuple[str, float, float]]" = queue.Queue()
+    for city in cities.itertuples(index=False):
+        work.put((str(getattr(city, id_column)), float(city.latitude), float(city.longitude)))
+
+    total_cities = work.qsize()
+    results: Dict[str, Optional[float]] = {}
+    lock = threading.Lock()
+    state = {"done": 0, "failed": 0}
+
+    def worker(endpoint: str) -> None:
+        with requests.Session() as session:
+            while True:
+                try:
+                    key, lat, lon = work.get_nowait()
+                except queue.Empty:
+                    return
+                try:
+                    was_cached = cache.get(key) is not None
+                    area = fetch_beach_area(
+                        lat,
+                        lon,
+                        cache=cache,
+                        cache_key=key,
+                        endpoints=(endpoint,),
+                        radius_m=radius_m,
+                        timeout_s=timeout_s,
+                        retries=retries,
+                        user_agent=user_agent,
+                        session=session,
+                    )
+                    with lock:
+                        results[key] = area
+                        state["done"] += 1
+                        if area is None:
+                            state["failed"] += 1
+                        if state["done"] % progress_every == 0:
+                            LOGGER.info(
+                                "Beach area progress: %d/%d (%d failed)",
+                                state["done"],
+                                total_cities,
+                                state["failed"],
+                            )
+                    if not was_cached:
+                        time.sleep(sleep_between_s)
+                finally:
+                    work.task_done()
+
+    threads = [
+        threading.Thread(target=worker, args=(endpoint,), daemon=True)
+        for endpoint in (endpoints or ("https://overpass-api.de/api/interpreter",))
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    rows = [
+        {
+            id_column: str(getattr(city, id_column)),
+            "beach_area_m2": results.get(str(getattr(city, id_column))) or 0.0,
+            "beach_area_available": results.get(str(getattr(city, id_column))) is not None,
+        }
+        for city in cities.itertuples(index=False)
+    ]
+    LOGGER.info("Beach area complete: %d cities, %d failures", len(rows), state["failed"])
+    return pd.DataFrame(rows)
 
 
 def fetch_poi_table(

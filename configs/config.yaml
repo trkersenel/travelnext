@@ -90,8 +90,12 @@ models:
     tfidf_max_features: 20000
     tfidf_ngram_max: 2
     # Weight of the TF-IDF text block vs. the numeric attribute block.
-    text_weight: 0.45
-    attribute_weight: 0.55
+    # Selected on the VALIDATION split (test untouched): 0.85 scored 0.0845
+    # NDCG@10 against 0.0644 for attributes alone and 0.0734 for text alone.
+    # The text blob carries country/region/continent tokens, so it also encodes
+    # the geographic relationships that pure attribute shares cannot.
+    text_weight: 0.85
+    attribute_weight: 0.15
     # Recency weighting of a user's past trips when building their profile.
     recency_decay: 0.85
   collaborative:
@@ -160,7 +164,11 @@ ranking:
     verbose: -1
   early_stopping_rounds: 50
   # Number of sampled negatives per positive when building training groups.
-  negatives_per_positive: 30
+  # Swept on validation against the 250-candidate inference set: 30 -> 0.2470,
+  # 60 -> 0.2484, 120 -> 0.2429, 249 -> 0.2475 NDCG@10. Essentially flat, so
+  # train/serve mismatch in negative sampling is NOT what holds the ranker
+  # back; 60 is kept as the marginal best.
+  negatives_per_positive: 60
 
 api:
   host: "0.0.0.0"
