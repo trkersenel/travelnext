@@ -403,18 +403,53 @@ button {
   white-space: nowrap;
 }
 
-select,
+/* Chunky select: the native control restyled to match the button/chip
+   language (2px border, a flat "shadow" edge for depth, a custom chevron
+   since the OS-drawn arrow clashes with everything else on the page). */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--charcoal);
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2382786c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 15px;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 11px 38px 11px 14px;
+  box-shadow: 0 3px 0 var(--border-strong);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
+}
+
+:root[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a968d' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+select:hover { border-color: var(--terracotta); }
+
+select:focus {
+  outline: none;
+  border-color: var(--terracotta);
+  box-shadow: 0 3px 0 var(--terracotta-shadow);
+}
+
+select:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--border-strong); }
+
 input[type="number"] {
   font-family: var(--font-ui);
   font-size: 14px;
   color: var(--charcoal);
   background: var(--surface);
-  border: 1px solid var(--border-strong);
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius);
-  padding: 7px 10px;
+  padding: 10px 12px;
 }
 
-select:focus,
 input:focus {
   outline: 2px solid var(--terracotta-soft);
   border-color: var(--terracotta);
@@ -1403,10 +1438,14 @@ input:focus {
 .rec-head .lede { margin-bottom: 0; }
 
 /* --- 10. refine ------------------------------------------------------- */
+/* A proper card rather than a plain top/bottom-border strip -- the strip
+   was a leftover from the quiet editorial layout and read as broken next to
+   the chunky cards everywhere else on the page. */
 .refine {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 22px 0 24px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 26px 26px;
   margin-bottom: 38px;
 }
 
@@ -1416,13 +1455,22 @@ input:focus {
   gap: 18px;
 }
 
-.field { display: grid; gap: 6px; }
+.field { display: grid; gap: 7px; }
 .field select { width: 100%; }
+.field > .label { font-weight: 700; }
 
-.refine-interests { margin-top: 20px; display: grid; gap: 9px; }
+.refine-interests {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
 
 .refine-foot {
   margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 16px;
