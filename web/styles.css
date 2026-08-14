@@ -1,77 +1,126 @@
-/* Waygo — editorial travel aesthetic.
+/* waygo — gamified travel design system.
  *
- * Design tokens taken from the Figma Make spec:
- *   warm ivory page, white card surfaces, charcoal text, warm-gray muted copy,
- *   terracotta used sparingly as the single accent.
+ * Pivoted from a quiet editorial look to something closer to Duolingo: bold
+ * flat colour, big rounded shapes, and "chunky" 3D buttons that visibly press
+ * when tapped. The travel data and its honesty rules are unchanged — this is
+ * a presentation-layer rebuild, not a new product.
  *
- * Deliberate constraints from that spec, kept honestly:
- *   - no gradients, no glow, no glassmorphism
- *   - subtle borders + minimal shadows, never rounded pill shapes
- *   - three typefaces with distinct jobs (serif display, sans UI, mono labels)
+ * Rules kept from the original brief:
+ *   - no gradients (one narrow exception: the photo-credit scrim, which
+ *     exists for legibility over an arbitrary photograph, not decoration)
+ *   - no glassmorphism / blur
+ *   - every accent colour has a defined JOB, so colour carries meaning:
+ *       green   = "go" / positive / completed (buttons, visited countries,
+ *                 match bars, finished onboarding steps)
+ *       gold    = reward / progress (XP pill, level bar, medals)
+ *       blue    = a second informational accent (used sparingly)
+ *       red     = destructive actions only (remove buttons)
+ *       purple  = the brand mark, and nothing else
  */
 
 :root {
   /* --- palette ------------------------------------------------------- */
-  --ivory: #f5f0e8;
+  --ivory: #faf7f0;
   --surface: #ffffff;
-  --charcoal: #2a1f1b;
-  --muted: #8a7d74;
-  --terracotta: #c4622d;
-  --terracotta-soft: rgba(196, 98, 45, 0.12);
-  --border: #e4dcd0;
-  --border-strong: #d5c9ba;
+  --charcoal: #2d2a26;
+  --muted: #82786c;
+  --border: #ece5d6;
+  --border-strong: #ddd3bf;
 
-  /* Brand mark. Deliberately a separate token from --terracotta: the logo is
-     purple, while terracotta stays the functional accent for match scores,
-     progress and the visited-country fill. A muted plum, not a neon violet —
-     the editorial rules still apply. */
-  --brand: #6d4a8c;
+  /* Functional accent: "go". Renamed from the old --terracotta, which no
+     longer describes the colour it holds; every usage site keeps the same
+     variable so this is a value change, not a rewrite. */
+  --terracotta: #4fae2e;
+  --terracotta-soft: rgba(79, 174, 46, 0.14);
+  --terracotta-shadow: #3c8a22;
+
+  /* Reward accent: XP, levels, medals. */
+  --gold: #ffc200;
+  --gold-shadow: #dfa300;
+  --gold-soft: rgba(255, 194, 0, 0.16);
+
+  /* Secondary informational accent, used sparingly. */
+  --blue: #1cb0f6;
+  --blue-shadow: #1899d6;
+
+  /* Destructive actions only. */
+  --red: #ff4b4b;
+  --red-shadow: #e63e3e;
+
+  /* Brand mark. Kept separate from the functional accent so the logo colour
+     and the "this means something happened" colour never compete. */
+  --brand: #7c4fe0;
 
   /* World map */
-  --map-ocean: #eef0f2;
-  --map-land: #dfd8cc;
+  --map-ocean: #eef4f0;
+  --map-land: #e1dac9;
   --map-stroke: #ffffff;
-  --map-visited: #c4622d;
+  --map-visited: var(--terracotta);
 
-  /* Primary button. Kept separate from --charcoal: that token is text, and it
-     inverts in dark mode, which turned solid buttons cream-on-white. */
-  --btn-bg: #2a1f1b;
+  /* Primary button face + its 3D "pressed" edge. */
+  --btn-bg: var(--terracotta);
   --btn-fg: #ffffff;
-  --btn-bg-hover: #3d2e28;
+  --btn-bg-hover: #58bf35;
+  --btn-shadow: var(--terracotta-shadow);
+
+  /* --- typography ------------------------------------------------------ */
+  /* Google Fonts are free and key-less. Every stack falls back to a system
+     face, so the page stays readable with no network at all. Baloo 2 is a
+     free, rounded, high-weight display face — the Duolingo-ish "friendly
+     game" tone — paired with the same clean DM Sans body copy as before. */
+  --font-display: "Baloo 2", "Segoe UI Rounded", -apple-system, sans-serif;
+  --font-ui: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* --- rhythm ------------------------------------------------------------ */
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(45, 42, 38, 0.05);
+  --shadow-lift: 0 10px 24px rgba(45, 42, 38, 0.12);
+  --max-width: 1180px;
 }
 
 /* ---------------------------------------------------------------- dark */
-/* Warm dark, not blue-black: the light theme is ivory and terracotta, so a
-   cold grey would read as a different product. Accents are lifted a step
-   because the light-theme values do not carry enough contrast on dark. */
+/* Cool dark rather than the old warm charcoal: bright green/gold accents
+   need a neutral backdrop to read clearly, and a brown-black would muddy
+   them. Every accent is lifted a step for contrast on the darker surface. */
 :root[data-theme="dark"] {
-  --ivory: #191512;
-  --surface: #221d19;
-  --charcoal: #f1eae1;
-  --muted: #a2958a;
-  --terracotta: #e07a42;
-  --terracotta-soft: rgba(224, 122, 66, 0.16);
-  --border: #302823;
-  --border-strong: #453a32;
-  --brand: #a98fd0;
+  --ivory: #14191c;
+  --surface: #1e2427;
+  --charcoal: #ece9e2;
+  --muted: #9a968d;
+  --border: #2a3134;
+  --border-strong: #3a4247;
 
-  --map-ocean: #14110f;
-  --map-land: #332c26;
-  --map-stroke: #191512;
-  --map-visited: #e07a42;
+  --terracotta: #58c132;
+  --terracotta-soft: rgba(88, 193, 50, 0.18);
+  --terracotta-shadow: #3f9924;
 
-  /* On dark, the high-contrast primary is a light button. */
-  --btn-bg: #f1eae1;
-  --btn-fg: #191512;
-  --btn-bg-hover: #ffffff;
+  --gold: #ffd23d;
+  --gold-shadow: #dba824;
+  --gold-soft: rgba(255, 210, 61, 0.18);
+
+  --blue: #3dc4ff;
+  --blue-shadow: #1ca8e8;
+
+  --red: #ff6b6b;
+  --red-shadow: #e04b4b;
+
+  --brand: #b497f5;
+
+  --map-ocean: #10161a;
+  --map-land: #333b3f;
+  --map-stroke: #14191c;
+  --map-visited: var(--terracotta);
+
+  --btn-bg: var(--terracotta);
+  --btn-fg: #0e1710;
+  --btn-bg-hover: #64d13e;
+  --btn-shadow: var(--terracotta-shadow);
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-lift: 0 6px 20px rgba(0, 0, 0, 0.5);
-}
-
-:root[data-theme="dark"] body {
-  /* Slightly thinner strokes read better as light-on-dark. */
-  -webkit-font-smoothing: antialiased;
+  --shadow-lift: 0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* Photographs are bright; knock them back a touch so they do not glare. */
@@ -83,20 +132,6 @@
 
 :root[data-theme="dark"] #map .leaflet-tile-pane {
   filter: saturate(0.1) brightness(0.55) contrast(1.05) invert(0.9) hue-rotate(180deg);
-}
-
-  /* --- typography ---------------------------------------------------- */
-  /* Google Fonts are free and key-less. Every stack falls back to a system
-     face, so the page stays readable with no network at all. */
-  --font-display: "Spectral", Georgia, "Times New Roman", serif;
-  --font-ui: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-
-  /* --- rhythm -------------------------------------------------------- */
-  --radius: 4px;
-  --shadow-card: 0 1px 2px rgba(42, 31, 27, 0.04);
-  --shadow-lift: 0 6px 20px rgba(42, 31, 27, 0.08);
-  --max-width: 1180px;
 }
 
 *,
@@ -439,18 +474,36 @@ input:focus {
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-card);
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
 }
 
 .card:hover {
   box-shadow: var(--shadow-lift);
-  transform: translateY(-2px);
+  border-color: var(--terracotta);
+  transform: translateY(-3px);
+}
+
+/* Medal for the top 3 under the current sort. Presentation only: the medal
+   follows the same score already shown as a percentage, it never implies a
+   different or additional ranking signal. */
+.card .medal {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  background: var(--surface);
+  box-shadow: 0 3px 0 var(--border-strong);
 }
 
 .card-photo {
@@ -476,14 +529,21 @@ input:focus {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: var(--terracotta);
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--gold);
+  color: #4a3400;
   font-family: var(--font-mono);
+  font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.04em;
-  padding: 5px 9px;
-  border-radius: var(--radius);
+  padding: 6px 11px 6px 9px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 3px 0 var(--gold-shadow);
 }
+
+.match-badge svg { width: 12px; height: 12px; }
 
 .card-body {
   padding: 18px 20px 22px;
@@ -494,8 +554,8 @@ input:focus {
 
 .card-city {
   font-family: var(--font-display);
-  font-size: 25px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 600;
   letter-spacing: -0.01em;
   margin: 0 0 3px;
 }
@@ -506,11 +566,11 @@ input:focus {
   margin: 0 0 14px;
 }
 
-/* Thin terracotta progress bar beneath the city name */
+/* Chunky rounded match bar beneath the city name. */
 .match-bar {
-  height: 3px;
+  height: 8px;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
   margin-bottom: 16px;
 }
@@ -519,6 +579,7 @@ input:focus {
   display: block;
   height: 100%;
   background: var(--terracotta);
+  border-radius: var(--radius-pill);
 }
 
 .card-meta {
@@ -534,9 +595,9 @@ input:focus {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 3px 7px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
 }
 
 .reasons {
@@ -569,17 +630,19 @@ input:focus {
 }
 
 .link-next {
-  background: none;
+  background: var(--terracotta-soft);
   border: 0;
-  padding: 0;
-  color: var(--terracotta);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  color: var(--terracotta-shadow);
+  font-weight: 700;
   font-size: 13px;
-  border-bottom: 1px solid var(--terracotta-soft);
+  transition: background 0.15s ease;
 }
 
-.link-next:hover {
-  border-bottom-color: var(--terracotta);
-}
+:root[data-theme="dark"] .link-next { color: var(--terracotta); }
+
+.link-next:hover { background: var(--terracotta); color: #fff; }
 
 /* ====================================================================== */
 /* "How we chose these" — left-border signposts                           */
@@ -773,21 +836,30 @@ input:focus {
   .hero { padding: 36px 0 28px; }
   .controls .shell { gap: 16px; }
 
-  /* The logo plus three nav items do not fit on a 375px row: the labels wrap
-     to three lines and the last item is clipped. Stack them instead, and let
-     the nav scroll horizontally rather than wrap. */
+  /* The logo, three nav items, the theme toggle, the XP pill and the avatar
+     do not fit on a 375px row. Wrapping to two rows keeps the logo and the
+     controls (toggle + XP + avatar) together on row one, right-aligned via
+     the same auto-margin trick used at desktop width, and pushes the nav
+     onto its own full-width, horizontally-scrollable row below — rather
+     than stacking every child onto its own line, which was the previous,
+     clunkier fix. */
   .site-header .shell {
     height: auto;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    padding-top: 12px;
-    padding-bottom: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 10px;
+    padding: 12px 20px 10px;
   }
+
+  .site-header .theme-toggle { margin-left: auto; }
 
   .logo { font-size: 21px; }
 
   .site-nav {
+    order: 3;
+    flex-basis: 100%;
+    margin: 0;
+    justify-content: flex-start;
     gap: 22px;
     overflow-x: auto;
     scrollbar-width: none;
@@ -800,6 +872,8 @@ input:focus {
     white-space: nowrap;
     padding-bottom: 9px;
   }
+
+  .xp-pill .xp-value { font-size: 12px; }
 }
 
 /* ====================================================================== */
@@ -826,9 +900,9 @@ input:focus {
 .display {
   font-family: var(--font-display);
   font-size: clamp(32px, 4.4vw, 52px);
-  line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0 0 16px;
 }
 
@@ -865,51 +939,74 @@ input:focus {
    This has to win over every component rule. */
 [hidden] { display: none !important; }
 
+/* Chunky "3D" press button: a flat face plus a solid colour block beneath it
+   (box-shadow, not a border, so it does not add layout height) standing in
+   for the button's depth. Pressing collapses that depth by animating the
+   button down into its own shadow — a two-property, no-JS trick. */
 .btn {
-  border: 1px solid transparent;
+  border: none;
   text-decoration: none;
-  border-radius: var(--radius);
-  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  padding: 14px 28px;
   font-size: 15px;
-  font-weight: 500;
-  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  font-weight: 700;
+  transform: translateY(0);
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease,
+    transform 0.06s ease, box-shadow 0.06s ease;
 }
 
 .btn-dark {
   background: var(--btn-bg);
   color: var(--btn-fg);
+  box-shadow: 0 4px 0 var(--btn-shadow);
 }
 
 .btn-dark:hover { background: var(--btn-bg-hover); }
 
+.btn-dark:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--btn-shadow);
+}
+
 .btn-dark:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: not-allowed;
+  box-shadow: 0 4px 0 var(--btn-shadow);
+  transform: none;
 }
 
 .btn-outline {
   background: var(--surface);
-  border-color: var(--border-strong);
+  border: 2px solid var(--border-strong);
   color: var(--charcoal);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  padding: 12px 26px;
+  box-shadow: 0 4px 0 var(--border-strong);
 }
 
-.btn-outline:hover { border-color: var(--charcoal); }
+.btn-outline:hover { border-color: var(--terracotta); }
+
+.btn-outline:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--border-strong);
+}
 
 .btn-ghost {
   background: none;
   color: var(--muted);
   padding-left: 0;
+  border-radius: var(--radius);
 }
 
 .btn-ghost:hover { color: var(--charcoal); }
+.btn-ghost:active { transform: none; box-shadow: none; }
 
 .g-mark {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--terracotta);
 }
 
@@ -993,14 +1090,16 @@ input:focus {
 
 .progress {
   flex: 1;
-  height: 2px;
+  height: 10px;
   background: var(--border);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .progress span {
   display: block;
   height: 100%;
+  border-radius: var(--radius-pill);
   background: var(--terracotta);
   transition: width 0.35s ease;
 }
@@ -1123,7 +1222,7 @@ input:focus {
   padding: 4px 6px;
 }
 
-.visited-list .v-remove:hover { color: var(--terracotta); }
+.visited-list .v-remove:hover { color: var(--red); }
 
 .empty-note { color: var(--muted); font-size: 14px; margin: 18px 0 0; }
 
@@ -1158,21 +1257,29 @@ input:focus {
 
 .chip-toggle {
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  padding: 9px 15px;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  padding: 9px 16px;
   font-size: 14px;
+  font-weight: 600;
   color: var(--charcoal);
-  transition: border-color 0.14s ease, background 0.14s ease;
+  box-shadow: 0 3px 0 var(--border-strong);
+  transform: translateY(0);
+  transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease,
+    transform 0.06s ease, box-shadow 0.06s ease;
 }
 
-.chip-toggle:hover { border-color: var(--charcoal); }
+.chip-toggle:hover { border-color: var(--terracotta); }
+.chip-toggle:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--border-strong); }
 
 .chip-toggle.is-on {
   background: var(--btn-bg);
   border-color: var(--btn-bg);
   color: var(--btn-fg);
+  box-shadow: 0 3px 0 var(--btn-shadow);
 }
+
+.chip-toggle.is-on:active { box-shadow: 0 1px 0 var(--btn-shadow); }
 
 .chips-budget .chip-toggle {
   font-family: var(--font-mono);
@@ -1180,7 +1287,8 @@ input:focus {
   text-align: center;
 }
 
-.chips-sm .chip-toggle { padding: 6px 11px; font-size: 13px; }
+.chips-sm .chip-toggle { padding: 6px 12px; font-size: 13px; box-shadow: 0 2px 0 var(--border-strong); }
+.chips-sm .chip-toggle.is-on { box-shadow: 0 2px 0 var(--btn-shadow); }
 
 /* --- 6. building ------------------------------------------------------ */
 .route { width: 100%; max-width: 420px; margin: 34px auto 26px; display: block; }
@@ -1205,10 +1313,24 @@ input:focus {
 }
 
 .steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: var(--muted);
   font-size: 15px;
-  opacity: 0.4;
+  font-weight: 600;
+  opacity: 0.45;
   transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.steps li::before {
+  content: "";
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .steps li.is-done {
@@ -1216,13 +1338,34 @@ input:focus {
   color: var(--charcoal);
 }
 
-.steps li.is-done::after {
-  content: " ✓";
-  color: var(--terracotta);
+.steps li.is-done::before {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  animation: step-pop 0.32s ease;
 }
 
 .steps li.is-active { opacity: 1; }
-.steps li.is-active::after { content: "…"; }
+.steps li.is-active::before {
+  border-color: var(--gold);
+  animation: step-pulse 1s ease-in-out infinite;
+}
+
+@keyframes step-pop {
+  0% { transform: scale(0.4); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes step-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--gold-soft); }
+  50% { box-shadow: 0 0 0 5px var(--gold-soft); }
+}
 
 /* --- 7. profile ------------------------------------------------------- */
 .profile-grid {
@@ -1244,12 +1387,13 @@ input:focus {
   font-size: 15px;
 }
 
-.trait-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.trait-bar span { display: block; height: 100%; background: var(--terracotta); }
+.trait-bar { height: 7px; background: var(--border); border-radius: var(--radius-pill); overflow: hidden; }
+.trait-bar span { display: block; height: 100%; background: var(--terracotta); border-radius: var(--radius-pill); }
 
 .profile-value {
   font-family: var(--font-display);
   font-size: 21px;
+  font-weight: 700;
   margin: 0;
 }
 
@@ -1328,7 +1472,7 @@ input:focus {
 .drawer h2 {
   font-family: var(--font-display);
   font-size: 30px;
-  font-weight: 500;
+  font-weight: 700;
   margin: 0 0 4px;
 }
 
@@ -1425,7 +1569,7 @@ input:focus {
   padding: 4px 8px;
 }
 
-.timeline .t-remove:hover { color: var(--terracotta); }
+.timeline .t-remove:hover { color: var(--red); }
 
 /* --- responsive ------------------------------------------------------- */
 @media (max-width: 980px) {
@@ -1498,13 +1642,16 @@ input:focus {
 /* ====================================================================== */
 /* Profile control (top right)                                            */
 /* ====================================================================== */
-.profile { position: relative; }
+/* flex so the XP pill and the avatar always sit in one row: without this,
+   the two buttons are inline-block-by-default and wrap onto separate lines
+   whenever the header itself wraps (e.g. mobile widths). */
+.profile { position: relative; display: flex; align-items: center; gap: 8px; }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid var(--border-strong);
+  border: 2px solid var(--border-strong);
   background: var(--surface);
   color: var(--charcoal);
   display: grid;
@@ -1519,13 +1666,45 @@ input:focus {
 .avatar:hover { border-color: var(--charcoal); }
 .avatar[aria-expanded="true"] { border-color: var(--terracotta); }
 
+/* --- XP pill: the game-HUD element next to the avatar, top right of every
+   app header. Clicking it opens the same menu as the avatar. ---------- */
+.xp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold-soft);
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  padding: 6px 12px 6px 8px;
+  color: var(--gold-shadow);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  transition: transform 0.06s ease, border-color 0.15s ease;
+}
+
+:root[data-theme="dark"] .xp-pill { color: var(--gold); }
+
+.xp-pill:hover { border-color: var(--gold); }
+.xp-pill:active { transform: scale(0.96); }
+.xp-pill svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* A short-lived bump when XP is gained, e.g. adding a country. */
+.xp-pill.is-bumped { animation: xp-bump 0.4s ease; }
+
+@keyframes xp-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
 .profile-menu {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  min-width: 230px;
+  min-width: 250px;
   background: var(--surface);
-  border: 1px solid var(--border-strong);
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lift);
   padding: 6px;
@@ -1540,7 +1719,7 @@ input:focus {
   gap: 2px;
 }
 
-.profile-name { font-weight: 500; font-size: 15px; }
+.profile-name { font-weight: 700; font-size: 15px; }
 
 .profile-sub {
   font-family: var(--font-mono);
@@ -1559,11 +1738,56 @@ input:focus {
   padding: 9px 12px;
   border-radius: var(--radius);
   font-size: 14px;
+  font-weight: 600;
   color: var(--charcoal);
 }
 
 .profile-item:hover { background: var(--ivory); }
 .profile-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+/* --- level summary, shown inside the profile menu ---------------------- */
+.level-block { padding: 8px 12px 10px; }
+
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.level-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--terracotta-soft);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.level-text { display: grid; line-height: 1.25; min-width: 0; }
+.level-name { font-weight: 700; font-size: 14px; }
+.level-xp {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.xp-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.xp-bar span {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
 
 /* ====================================================================== */
 /* Countries visited — world map                                          */
@@ -1581,40 +1805,54 @@ input:focus {
 
 .country-stats {
   display: flex;
-  gap: 34px;
-  align-items: baseline;
+  gap: 14px;
   margin-bottom: 22px;
   flex-wrap: wrap;
 }
 
+/* Chunky coloured stat tiles rather than plain typographic stats — each one
+   a small, flat-coloured "HUD" card, one per accent colour so the three
+   numbers stay visually distinct at a glance. */
+.stat-block {
+  display: grid;
+  gap: 2px;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  background: var(--terracotta-soft);
+  min-width: 128px;
+}
+
+.stat-block:nth-child(2) { background: var(--gold-soft); }
+.stat-block:nth-child(3) { background: var(--blue); background: color-mix(in srgb, var(--blue) 16%, transparent); }
+
 .stat-value {
   font-family: var(--font-display);
-  font-size: 40px;
-  line-height: 1;
-  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 700;
 }
 
 .stat-value .stat-of {
-  font-size: 17px;
+  font-size: 15px;
   color: var(--muted);
   font-family: var(--font-ui);
+  font-weight: 500;
 }
 
-.stat-block { display: grid; gap: 5px; }
+.country-controls { margin: 0 0 26px; }
 
-.country-controls { margin: 26px 0 8px; }
-
-.country-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 72px; }
+.country-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
 
 .country-chip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  padding: 7px 10px 7px 12px;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  padding: 7px 10px 7px 14px;
   font-size: 14px;
+  font-weight: 600;
 }
 
 .country-chip .cc-remove {
@@ -1626,14 +1864,89 @@ input:focus {
   padding: 0 2px;
 }
 
-.country-chip .cc-remove:hover { color: var(--terracotta); }
+.country-chip .cc-remove:hover { color: var(--red); }
 .country-chip .cc-count { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+/* ====================================================================== */
+/* Badges — milestones computed from real countries/trips, never fabricated */
+/* ====================================================================== */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 12px;
+  margin-bottom: 56px;
+}
+
+.badge {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  text-align: center;
+  transition: transform 0.15s ease;
+}
+
+.badge-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+  background: var(--border);
+}
+
+.badge-label { font-size: 12px; font-weight: 700; line-height: 1.25; }
+.badge-note { font-size: 10.5px; color: var(--muted); }
+
+.badge.is-unlocked {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.badge.is-unlocked .badge-icon {
+  background: var(--gold);
+  box-shadow: 0 3px 0 var(--gold-shadow);
+}
+
+.badge.is-locked { opacity: 0.55; }
+.badge.is-locked .badge-icon { filter: grayscale(1); }
+
+/* ====================================================================== */
+/* Level banner — the payoff shown on the Travel Profile screen            */
+/* ====================================================================== */
+.level-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--terracotta-soft);
+  border: 2px solid var(--terracotta);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  margin: 20px 0 32px;
+}
+
+.level-banner .level-badge {
+  width: 52px;
+  height: 52px;
+  font-size: 26px;
+  background: var(--surface);
+  box-shadow: 0 3px 0 var(--border-strong);
+}
+
+.level-banner .level-text { display: grid; gap: 2px; }
+.level-banner .level-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+.level-banner .level-xp { font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
 
 @media (max-width: 640px) {
   #world-map { height: 380px; }
-  .country-stats { gap: 22px; }
-  .stat-value { font-size: 31px; }
+  .country-stats { gap: 10px; }
+  .stat-block { padding: 12px 16px; min-width: 100px; }
+  .stat-value { font-size: 26px; }
   .profile-menu { right: -8px; }
+  .badge-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
 }
 
 /* --- dark mode toggle -------------------------------------------------- */
@@ -1660,3 +1973,30 @@ input:focus {
 :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
 
+/* ====================================================================== */
+/* Confetti — a small celebratory burst, DOM-based, no library             */
+/* ====================================================================== */
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 200;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: confetti-fall linear forwards;
+}
+
+.confetti-piece.is-round { border-radius: 50%; }
+
+@keyframes confetti-fall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: var(--confetti-end, translate(0, 70vh) rotate(540deg)); opacity: 0; }
+}

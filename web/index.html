@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
 <!-- Leaflet for the travel-history map: free, open source, OpenStreetMap
      tiles, no key. Desaturated in CSS to keep the neutral editorial tone. -->
@@ -214,6 +214,10 @@
     <span class="label">Inferred from your travel history</span>
     <h1 class="display">Your travel profile</h1>
 
+    <!-- Payoff moment: your level, computed honestly from the countries and
+         trips you actually entered — never a fabricated streak or count. -->
+    <div class="level-banner" id="level-banner"></div>
+
     <div class="profile-grid">
       <div class="profile-block">
         <h2 class="sub">You seem to enjoy</h2>
@@ -266,40 +270,57 @@
         <button data-view="countries">My map</button>
         <button data-view="trips">My trips</button>
       </nav>
-        <button class="theme-toggle" data-theme-toggle
-                aria-label="Toggle dark mode" title="Toggle dark mode">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2" />
-            <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4" />
+      <button class="theme-toggle" data-theme-toggle
+              aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4" />
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z" />
+        </svg>
+      </button>
+      <div class="profile" data-profile>
+        <button class="xp-pill" aria-haspopup="menu" aria-expanded="false" title="Your progress">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 15 9 22 9.5 16.5 14.5 18.5 22 12 17.8 5.5 22 7.5 14.5 2 9.5 9 9" />
           </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z" />
-          </svg>
+          <span class="xp-value">0 XP</span>
         </button>
-        <div class="profile" data-profile>
-          <button class="avatar" id="avatar-rec" aria-haspopup="menu" aria-expanded="false"
-                  title="Your profile">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+        <button class="avatar" aria-haspopup="menu" aria-expanded="false" title="Your profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" aria-hidden="true">
             <circle cx="12" cy="8.2" r="3.6" />
             <path d="M4.8 20c.6-3.8 3.5-6 7.2-6s6.6 2.2 7.2 6" />
           </svg>
-          </button>
-          <div class="profile-menu" hidden>
-            <div class="profile-head">
-              <span class="profile-name">Guest</span>
-              <span class="profile-sub">Not signed in</span>
-            </div>
-            <button class="profile-item" data-view="countries">Countries visited</button>
-            <button class="profile-item" data-view="trips">My trips</button>
-            <button class="profile-item" data-view="profile">Travel profile</button>
-            <div class="profile-divider"></div>
-            <button class="profile-item" data-profile-signin>Sign in to save</button>
-            <button class="profile-item" data-profile-reset>Start over</button>
+        </button>
+        <div class="profile-menu" hidden>
+          <div class="profile-head">
+            <span class="profile-name">Guest</span>
+            <span class="profile-sub">Not signed in</span>
           </div>
+          <div class="level-block">
+            <div class="level-row">
+              <span class="level-badge">🧭</span>
+              <div class="level-text">
+                <span class="level-name">Homebody</span>
+                <span class="level-xp">0 XP</span>
+              </div>
+            </div>
+            <div class="xp-bar"><span style="width:0%"></span></div>
+          </div>
+          <div class="profile-divider"></div>
+          <button class="profile-item" data-view="countries">Countries visited</button>
+          <button class="profile-item" data-view="trips">My trips</button>
+          <button class="profile-item" data-view="profile">Travel profile</button>
+          <div class="profile-divider"></div>
+          <button class="profile-item" data-profile-signin>Sign in to save</button>
+          <button class="profile-item" data-profile-reset>Start over</button>
         </div>
+      </div>
     </div>
   </header>
 
@@ -390,40 +411,57 @@
         <button data-view="countries">My map</button>
         <button data-view="trips" class="is-active">My trips</button>
       </nav>
-        <button class="theme-toggle" data-theme-toggle
-                aria-label="Toggle dark mode" title="Toggle dark mode">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2" />
-            <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4" />
+      <button class="theme-toggle" data-theme-toggle
+              aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4" />
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z" />
+        </svg>
+      </button>
+      <div class="profile" data-profile>
+        <button class="xp-pill" aria-haspopup="menu" aria-expanded="false" title="Your progress">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 15 9 22 9.5 16.5 14.5 18.5 22 12 17.8 5.5 22 7.5 14.5 2 9.5 9 9" />
           </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z" />
-          </svg>
+          <span class="xp-value">0 XP</span>
         </button>
-        <div class="profile" data-profile>
-          <button class="avatar" id="avatar-trips" aria-haspopup="menu" aria-expanded="false"
-                  title="Your profile">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+        <button class="avatar" aria-haspopup="menu" aria-expanded="false" title="Your profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" aria-hidden="true">
             <circle cx="12" cy="8.2" r="3.6" />
             <path d="M4.8 20c.6-3.8 3.5-6 7.2-6s6.6 2.2 7.2 6" />
           </svg>
-          </button>
-          <div class="profile-menu" hidden>
-            <div class="profile-head">
-              <span class="profile-name">Guest</span>
-              <span class="profile-sub">Not signed in</span>
-            </div>
-            <button class="profile-item" data-view="countries">Countries visited</button>
-            <button class="profile-item" data-view="trips">My trips</button>
-            <button class="profile-item" data-view="profile">Travel profile</button>
-            <div class="profile-divider"></div>
-            <button class="profile-item" data-profile-signin>Sign in to save</button>
-            <button class="profile-item" data-profile-reset>Start over</button>
+        </button>
+        <div class="profile-menu" hidden>
+          <div class="profile-head">
+            <span class="profile-name">Guest</span>
+            <span class="profile-sub">Not signed in</span>
           </div>
+          <div class="level-block">
+            <div class="level-row">
+              <span class="level-badge">🧭</span>
+              <div class="level-text">
+                <span class="level-name">Homebody</span>
+                <span class="level-xp">0 XP</span>
+              </div>
+            </div>
+            <div class="xp-bar"><span style="width:0%"></span></div>
+          </div>
+          <div class="profile-divider"></div>
+          <button class="profile-item" data-view="countries">Countries visited</button>
+          <button class="profile-item" data-view="trips">My trips</button>
+          <button class="profile-item" data-view="profile">Travel profile</button>
+          <div class="profile-divider"></div>
+          <button class="profile-item" data-profile-signin>Sign in to save</button>
+          <button class="profile-item" data-profile-reset>Start over</button>
         </div>
+      </div>
     </div>
   </header>
 
@@ -475,18 +513,25 @@
         <button data-view="trips">My trips</button>
       </nav>
       <button class="theme-toggle" data-theme-toggle
-                aria-label="Toggle dark mode" title="Toggle dark mode">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2" />
-            <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4" />
+              aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4" />
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z" />
+        </svg>
+      </button>
+      <div class="profile" data-profile>
+        <button class="xp-pill" aria-haspopup="menu" aria-expanded="false" title="Your progress">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 15 9 22 9.5 16.5 14.5 18.5 22 12 17.8 5.5 22 7.5 14.5 2 9.5 9 9" />
           </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z" />
-          </svg>
+          <span class="xp-value">0 XP</span>
         </button>
-        <div class="profile" data-profile>
         <button class="avatar" aria-haspopup="menu" aria-expanded="false" title="Your profile">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" aria-hidden="true">
@@ -499,6 +544,17 @@
             <span class="profile-name">Guest</span>
             <span class="profile-sub">Not signed in</span>
           </div>
+          <div class="level-block">
+            <div class="level-row">
+              <span class="level-badge">🧭</span>
+              <div class="level-text">
+                <span class="level-name">Homebody</span>
+                <span class="level-xp">0 XP</span>
+              </div>
+            </div>
+            <div class="xp-bar"><span style="width:0%"></span></div>
+          </div>
+          <div class="profile-divider"></div>
           <button class="profile-item" data-view="countries">Countries visited</button>
           <button class="profile-item" data-view="trips">My trips</button>
           <button class="profile-item" data-view="profile">Travel profile</button>
@@ -508,7 +564,6 @@
         </div>
       </div>
     </div>
-      </div>
   </header>
 
   <div class="shell">
@@ -540,6 +595,10 @@
 
     <h2 class="sub">Your countries</h2>
     <div class="country-chips" id="country-chips"></div>
+
+    <h2 class="sub">Badges</h2>
+    <p class="hint">Unlocked from the countries and trips you've actually added — nothing here is timed or guessed.</p>
+    <div class="badge-grid" id="badge-grid"></div>
   </div>
 </section>
 
@@ -551,6 +610,10 @@
   <button class="drawer-close" id="drawer-close" aria-label="Close">×</button>
   <div id="drawer-content"></div>
 </aside>
+
+<!-- Confetti burst target: JS appends short-lived particle divs here on a
+     celebratory moment (adding a country, unlocking a badge). -->
+<div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/static/app.js"></script>

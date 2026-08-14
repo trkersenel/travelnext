@@ -52,6 +52,134 @@ const BUDGETS = [
 
 const COST_SYMBOL = { budget: "€", "mid-range": "€€", expensive: "€€€" };
 
+/* ------------------------------------------------------------- gamification
+ *
+ * Everything below is computed from the traveller's OWN data — the countries
+ * they've marked visited and the trips they've added — never from a fake
+ * "streak" or an invented event. There is no day-by-day usage tracking in
+ * this app, so there is no login streak: XP, levels and badges are the
+ * honest alternative, each one a transparent function of real counts.
+ */
+
+/** Explorer levels, keyed by total XP. Ordered ascending; the last one with
+ *  a threshold at or below the traveller's XP wins. */
+const LEVELS = [
+  { min: 0, name: "Homebody", icon: "🏠" },
+  { min: 20, name: "Wanderer", icon: "🧭" },
+  { min: 60, name: "Explorer", icon: "🗺️" },
+  { min: 120, name: "Globetrotter", icon: "🌍" },
+  { min: 200, name: "Jetsetter", icon: "✈️" },
+  { min: 320, name: "World Nomad", icon: "🌐" },
+  { min: 480, name: "Legend", icon: "🏆" },
+];
+
+/** Badge definitions. `test` reads only real, already-available state. */
+const BADGES = [
+  {
+    id: "first-trip",
+    label: "First trip",
+    icon: "🎒",
+    test: (s) => s.history.length >= 1,
+  },
+  {
+    id: "first-country",
+    label: "First country",
+    icon: "📍",
+    test: (s, visited) => visited.size >= 1,
+  },
+  {
+    id: "five-countries",
+    label: "5 countries",
+    icon: "🗺️",
+    test: (s, visited) => visited.size >= 5,
+  },
+  {
+    id: "ten-countries",
+    label: "10 countries",
+    icon: "🌍",
+    test: (s, visited) => visited.size >= 10,
+  },
+  {
+    id: "three-continents",
+    label: "3 continents",
+    icon: "🧳",
+    test: (s, visited, continents) => continents.size >= 3,
+  },
+  {
+    id: "six-continents",
+    label: "Every continent",
+    icon: "🌐",
+    test: (s, visited, continents) => continents.size >= 6,
+  },
+  {
+    id: "city-hopper",
+    label: "5 trips logged",
+    icon: "🏙️",
+    test: (s) => s.history.length >= 5,
+  },
+  {
+    id: "twenty-countries",
+    label: "20 countries",
+    icon: "🏆",
+    test: (s, visited) => visited.size >= 20,
+  },
+];
+
+/** XP: a plain, disclosed formula over real counts — 20 per country visited,
+ *  8 per trip added. Not a hidden score; the profile menu labels it as such. */
+function computeXP() {
+  const visited = visitedCountryCodes();
+  return visited.size * 20 + state.history.length * 8;
+}
+
+function computeLevel(xp) {
+  let current = LEVELS[0];
+  let next = LEVELS[1] || null;
+  for (let i = 0; i < LEVELS.length; i += 1) {
+    if (xp >= LEVELS[i].min) {
+      current = LEVELS[i];
+      next = LEVELS[i + 1] || null;
+    }
+  }
+  const span = next ? next.min - current.min : 1;
+  const progress = next ? Math.min(1, (xp - current.min) / span) : 1;
+  return { current, next, progress, xp };
+}
+
+function computeBadges() {
+  const visited = visitedCountryCodes();
+  const continents = new Set(
+    [...visited].map((c) => (state.countryByCode.get(c) || {}).continent).filter(Boolean)
+  );
+  return BADGES.map((badge) => ({
+    ...badge,
+    unlocked: Boolean(badge.test(state, visited, continents)),
+  }));
+}
+
+/** A short, DOM-based confetti burst — no canvas, no library. */
+function burstConfetti(originX, originY, count = 26) {
+  const layer = document.getElementById("confetti-layer");
+  if (!layer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colours = ["--terracotta", "--gold", "--blue", "--brand"];
+  for (let i = 0; i < count; i += 1) {
+    const piece = document.createElement("div");
+    const colour = token(colours[i % colours.length], "#4fae2e");
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 60 + Math.random() * 140;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.abs(Math.sin(angle) * distance) + 220;
+    piece.className = `confetti-piece${Math.random() > 0.5 ? " is-round" : ""}`;
+    piece.style.left = `${originX}px`;
+    piece.style.top = `${originY}px`;
+    piece.style.background = colour;
+    piece.style.setProperty("--confetti-end", `translate(${dx}px, ${dy}px) rotate(${360 + Math.random() * 360}deg)`);
+    piece.style.animationDuration = `${900 + Math.random() * 500}ms`;
+    layer.appendChild(piece);
+    piece.addEventListener("animationend", () => piece.remove());
+  }
+}
+
 const state = {
   history: [],          // destination ids, in the order the traveller added them
   interests: [],
@@ -584,6 +712,23 @@ function renderProfile() {
       </div>`
     )
     .join("");
+
+  renderLevelBanner();
+}
+
+/** The celebratory level strip at the top of the Travel Profile screen. */
+function renderLevelBanner() {
+  const banner = $("level-banner");
+  if (!banner) return;
+  const level = computeLevel(computeXP());
+  banner.innerHTML = `
+    <span class="level-badge">${level.current.icon}</span>
+    <div class="level-text">
+      <span class="level-name">You're a ${level.current.name}!</span>
+      <span class="level-xp">${level.xp} XP earned from your countries and trips${
+        level.next ? ` · ${level.next.min - level.xp} XP to ${level.next.name}` : ""
+      }</span>
+    </div>`;
 }
 
 /* ------------------------------------------- 8 & 10. recommendations */
@@ -621,6 +766,10 @@ async function fetchRecommendations() {
   return payload;
 }
 
+/* Presentation sugar only: the medal restates the rank the card is already
+   shown in (the same score, same order), it is never a second signal. */
+const MEDALS = ["🥇", "🥈", "🥉"];
+
 function renderCards() {
   $("cards").innerHTML = state.results
     .map((item, index) => {
@@ -632,7 +781,13 @@ function renderCards() {
       return `<article class="card${index === 0 ? " is-lead" : ""}">
         <div class="card-photo">
           ${photo(item, '', true, 'card')}
-          <span class="match-badge">${match}% match</span>
+          ${MEDALS[index] ? `<span class="medal">${MEDALS[index]}</span>` : ""}
+          <span class="match-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="12 2 15 9 22 9.5 16.5 14.5 18.5 22 12 17.8 5.5 22 7.5 14.5 2 9.5 9 9" />
+            </svg>
+            ${match}% match
+          </span>
         </div>
         <div class="card-body">
           <h3 class="card-city">${item.city}</h3>
@@ -909,6 +1064,14 @@ function repaintWorldMap() {
   });
 }
 
+/** Bounding-box centre of the XP pill in the currently visible header. */
+function xpPillOrigin() {
+  const active = document.querySelector(".screen.is-active .xp-pill");
+  if (!active) return { x: window.innerWidth - 60, y: 40 };
+  const rect = active.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
 async function toggleCountry(code) {
   const implied = impliedCountryCodes();
   if (implied.has(code)) {
@@ -919,13 +1082,31 @@ async function toggleCountry(code) {
     );
     return;
   }
-  if (state.countriesPicked.has(code)) {
-    state.countriesPicked.delete(code);
-  } else {
+
+  const badgesBefore = computeBadges().filter((b) => b.unlocked).map((b) => b.id);
+  const adding = !state.countriesPicked.has(code);
+
+  if (adding) {
     state.countriesPicked.add(code);
+  } else {
+    state.countriesPicked.delete(code);
   }
   await persistCountries();
   renderCountries();
+  renderProfileMenus();
+
+  if (adding) {
+    const origin = xpPillOrigin();
+    const badgesAfter = computeBadges().filter((b) => b.unlocked).map((b) => b.id);
+    const newlyUnlocked = badgesAfter.filter((id) => !badgesBefore.includes(id));
+    burstConfetti(origin.x, origin.y, newlyUnlocked.length ? 42 : 24);
+    document.querySelectorAll(".screen.is-active .xp-pill").forEach((pill) => {
+      pill.classList.remove("is-bumped");
+      // Re-trigger the CSS animation even if it just played.
+      void pill.offsetWidth;
+      pill.classList.add("is-bumped");
+    });
+  }
 }
 
 /** Push the explicit picks to the server when the traveller is signed in. */
@@ -987,8 +1168,25 @@ function renderCountries() {
     button.addEventListener("click", () => toggleCountry(button.dataset.countryRemove))
   );
 
+  renderBadges();
   repaintWorldMap();
   drawWorldMap();
+}
+
+/** The badge grid on the Countries screen — locked vs unlocked, both honest:
+ *  a badge shows unlocked only when its real-data test actually passes. */
+function renderBadges() {
+  const grid = $("badge-grid");
+  if (!grid) return;
+  grid.innerHTML = computeBadges()
+    .map(
+      (badge) => `<div class="badge ${badge.unlocked ? "is-unlocked" : "is-locked"}">
+        <span class="badge-icon">${badge.icon}</span>
+        <span class="badge-label">${badge.label}</span>
+        <span class="badge-note">${badge.unlocked ? "Unlocked" : "Locked"}</span>
+      </div>`
+    )
+    .join("");
 }
 
 function attachCountrySearch() {
@@ -1024,11 +1222,14 @@ function attachCountrySearch() {
   list.addEventListener("click", async (event) => {
     const li = event.target.closest("li");
     if (!li) return;
-    state.countriesPicked.add(li.dataset.code);
     input.value = "";
     close();
-    await persistCountries();
-    renderCountries();
+    // Routed through toggleCountry() rather than touching state directly, so
+    // the XP pill refresh, badge check and confetti burst all fire here too
+    // — a country added by search is otherwise indistinguishable from one
+    // added by tapping the map. The list only ever offers countries that are
+    // not already visited, so this always adds, never removes.
+    await toggleCountry(li.dataset.code);
   });
 
   document.addEventListener("click", (event) => {
@@ -1095,6 +1296,8 @@ function wireTheme() {
 
 function renderProfileMenus() {
   const signedIn = Boolean(state.user);
+  const level = computeLevel(computeXP());
+
   document.querySelectorAll("[data-profile]").forEach((wrapper) => {
     const name = wrapper.querySelector(".profile-name");
     const sub = wrapper.querySelector(".profile-sub");
@@ -1113,25 +1316,46 @@ function renderProfileMenus() {
       signin.textContent = signedIn ? "Sign out" : "Sign in to save";
       signin.hidden = !signedIn && !state.loginEnabled;
     }
+
+    const xpPill = wrapper.querySelector(".xp-value");
+    if (xpPill) xpPill.textContent = `${level.xp} XP`;
+
+    const badge = wrapper.querySelector(".level-badge");
+    if (badge) badge.textContent = level.current.icon;
+    const levelName = wrapper.querySelector(".level-name");
+    if (levelName) levelName.textContent = level.current.name;
+    const levelXp = wrapper.querySelector(".level-xp");
+    if (levelXp) {
+      levelXp.textContent = level.next
+        ? `${level.xp} / ${level.next.min} XP to ${level.next.name}`
+        : `${level.xp} XP · max level`;
+    }
+    const xpBar = wrapper.querySelector(".xp-bar span");
+    if (xpBar) xpBar.style.width = `${Math.round(level.progress * 100)}%`;
   });
 }
 
 function wireProfileMenus() {
   document.querySelectorAll("[data-profile]").forEach((wrapper) => {
     const avatar = wrapper.querySelector(".avatar");
+    const xpPill = wrapper.querySelector(".xp-pill");
     const menu = wrapper.querySelector(".profile-menu");
 
-    avatar.addEventListener("click", (event) => {
+    const toggleMenu = (event) => {
       event.stopPropagation();
       const open = menu.hidden;
       // Only one menu open at a time across the app's three headers.
       document.querySelectorAll(".profile-menu").forEach((m) => (m.hidden = true));
       document
-        .querySelectorAll(".avatar")
+        .querySelectorAll(".avatar, .xp-pill")
         .forEach((a) => a.setAttribute("aria-expanded", "false"));
       menu.hidden = !open;
       avatar.setAttribute("aria-expanded", String(open));
-    });
+      if (xpPill) xpPill.setAttribute("aria-expanded", String(open));
+    };
+
+    avatar.addEventListener("click", toggleMenu);
+    if (xpPill) xpPill.addEventListener("click", toggleMenu);
 
     menu.querySelectorAll("[data-view]").forEach((item) =>
       item.addEventListener("click", () => {
@@ -1172,7 +1396,9 @@ function wireProfileMenus() {
 
   document.addEventListener("click", () => {
     document.querySelectorAll(".profile-menu").forEach((m) => (m.hidden = true));
-    document.querySelectorAll(".avatar").forEach((a) => a.setAttribute("aria-expanded", "false"));
+    document
+      .querySelectorAll(".avatar, .xp-pill")
+      .forEach((a) => a.setAttribute("aria-expanded", "false"));
   });
 }
 
