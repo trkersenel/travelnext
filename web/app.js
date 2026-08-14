@@ -134,35 +134,7 @@ async function syncPreferences() {
 }
 
 function markSynced() {
-  document.querySelectorAll(".account .synced").forEach((el) => {
-    el.textContent = "Saved";
-    clearTimeout(el._t);
-    el._t = setTimeout(() => (el.textContent = ""), 1800);
-  });
-}
-
-function renderAccount() {
-  const markup = state.user
-    ? `${state.user.picture ? `<img src="${state.user.picture}" alt="" />` : ""}
-       <span class="who">${state.user.name || state.user.email}</span>
-       <span class="synced"></span>
-       <button data-signout>Sign out</button>`
-    : state.loginEnabled
-      ? `<a href="/auth/login?next=/"><button>Sign in to save trips</button></a>`
-      : "";
-  ["account", "account-trips"].forEach((id) => {
-    const el = $(id);
-    if (el) el.innerHTML = markup;
-  });
-
-  document.querySelectorAll("[data-signout]").forEach((button) =>
-    button.addEventListener("click", async () => {
-      await api("/auth/logout", { method: "POST" }).catch(() => {});
-      state.user = null;
-      renderAccount();
-      show("login");
-    })
-  );
+  // The profile menu shows sync state; nothing else to update.
 }
 
 /** Load auth state; restore a signed-in traveller's stored history. */
@@ -204,7 +176,7 @@ async function loadSession() {
     if (preferences.duration_days) state.duration = preferences.duration_days;
     if (preferences.budget) state.budget = preferences.budget;
   }
-  renderAccount();
+  renderProfileMenus();
   return Boolean(state.user);
 }
 
@@ -1081,38 +1053,41 @@ function attachCountrySearch() {
 const THEME_KEY = "waygo-theme";
 const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
 
-function resolveTheme(choice) {
-  return choice === "system" ? (systemDark.matches ? "dark" : "light") : choice;
-}
-
-function applyTheme(choice) {
-  const resolved = resolveTheme(choice);
-  document.documentElement.setAttribute("data-theme", resolved);
-  localStorage.setItem(THEME_KEY, choice);
-  document.querySelectorAll("[data-theme-switch] button").forEach((button) =>
-    button.classList.toggle("is-active", button.dataset.themeSet === choice)
-  );
-  // Leaflet paints country fills inline, so a token change alone will not
-  // repaint them; ask the map to restyle with the new palette.
+/**
+ * Dark mode: one button, two states.
+ *
+ * The first visit follows the operating system. After that the traveller's
+ * own choice wins and is remembered, because someone who reached for the
+ * toggle has said what they want more clearly than the OS setting has.
+ */
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem(THEME_KEY, theme);
+  // Leaflet writes country fills inline, so a token change alone will not
+  // repaint them.
   if (typeof repaintWorldMap === "function") repaintWorldMap();
 }
 
-function currentThemeChoice() {
-  return localStorage.getItem(THEME_KEY) || "system";
+function toggleTheme() {
+  const next =
+    document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  applyTheme(next);
 }
 
 function wireTheme() {
-  applyTheme(currentThemeChoice());
-  document.querySelectorAll("[data-theme-switch]").forEach((group) =>
-    group.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-theme-set]");
-      if (!button) return;
+  const stored = localStorage.getItem(THEME_KEY);
+  applyTheme(stored || (systemDark.matches ? "dark" : "light"));
+
+  document.querySelectorAll("[data-theme-toggle]").forEach((button) =>
+    button.addEventListener("click", (event) => {
       event.stopPropagation();
-      applyTheme(button.dataset.themeSet);
+      toggleTheme();
     })
   );
-  systemDark.addEventListener("change", () => {
-    if (currentThemeChoice() === "system") applyTheme("system");
+
+  // Follow the OS only until the traveller expresses a preference.
+  systemDark.addEventListener("change", (event) => {
+    if (!localStorage.getItem(THEME_KEY)) applyTheme(event.matches ? "dark" : "light");
   });
 }
 

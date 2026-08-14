@@ -163,9 +163,16 @@ button {
 .site-header .shell {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* Not space-between: with four children (logo, nav, theme toggle, profile)
+     it spread them evenly and stranded the toggle in the middle. Auto margins
+     on the nav centre it and push the two controls flush right instead. */
+  justify-content: flex-start;
   height: 68px;
 }
+
+.site-nav { margin-left: auto; margin-right: auto; }
+/* The header sets a gap, so the toggle needs no margin of its own. */
+.site-header .theme-toggle { margin-right: 0; }
 
 .logo {
   font-family: var(--font-display);
@@ -1629,20 +1636,27 @@ input:focus {
   .profile-menu { right: -8px; }
 }
 
-/* --- appearance switch inside the profile menu ------------------------ */
-.profile-theme {
-  padding: 10px 12px 6px;
+/* --- dark mode toggle -------------------------------------------------- */
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--charcoal);
   display: grid;
-  gap: 8px;
+  place-items: center;
+  padding: 0;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-.segmented-sm button {
-  padding: 5px 9px;
-  font-size: 12px;
-  flex: 1;
-}
+.theme-toggle:hover { border-color: var(--charcoal); }
+.theme-toggle svg { width: 18px; height: 18px; }
 
-.segmented-sm button.is-active {
-  background: var(--brand);
-  color: #fff;
-}
+/* Show the moon in light mode (tap to go dark) and the sun in dark mode
+   (tap to go light): the icon advertises the result, not the current state. */
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+
