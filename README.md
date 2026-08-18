@@ -1,4 +1,4 @@
-# TravelNext
+# waygo
 
 **"Where should I travel next?"** — an explainable travel recommendation engine
 built entirely on free, openly licensed data.
